@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Arduino.h>
 #include <WiFiUdp.h>
 
 #define UDP_PORT 69
@@ -14,5 +15,5 @@ public:
     uint8_t init();
     uint8_t is_active();
     void recv_packet();
-    void send_packet();
+    void send_packet(uint32_t);
 };

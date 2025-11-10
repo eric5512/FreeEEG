@@ -16,4 +16,4 @@ while True:
         time.sleep(1/freq)
         n = c % freq
         c += 1
-        udp.sendto(n.to_bytes(), (addr, port))
+        udp.sendto(b"\x20\x00\x00"+n.to_bytes(), (addr, port))

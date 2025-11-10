@@ -20,13 +20,16 @@ void DataServer::recv_packet() {
             user_ip = udp.remoteIP();
             user_port = udp.remotePort();
             active = 1;
-        } else if (strcmp("stop", (const char *)buff) == 0) 
+        } else if (strcmp("stop", (const char *)buff) == 0) {
             active = 0;
+        }
     }
 }
 
-void DataServer::send_packet() {
+void DataServer::send_packet(uint32_t data) {
     udp.beginPacket(user_ip, user_port);
-    udp.write("test", 4); // TODO: Send the real data from the EOS S3 SPI interface
+    // TODO: Send the real data from the EOS S3 SPI interface
+    udp.write('\x20');
+    udp.write(((const char *) (&data)), 3);
     udp.endPacket();
 }
