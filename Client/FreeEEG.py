@@ -58,16 +58,37 @@ class FreeEEG:
         return block if blocking else nonblock
 
     # Packet types:
-    # - Accelerometer [type (\x10) (4 bits)][ padding (4 bits)][value x (8 bits)][value y (8 bits)][value z (8 bits)]
-    # - Electrode [type (\x20) (4 bits)][electrode ID (4 bits)][value (24 bits)]
+    # - Electrode     [type (0b00) (2 bits)][timestamp rel (24 bits)][value (24 bits)]* <- Variable lenght depending on num of channels active
+    # - Accelerometer [type (0b01) (2 bits)][timestamp rel (24 bits)][ACC_X (16 bits)][ACC_Y (16 bits)][ACC_Z (16 bits)][GIR_X (16 bits)][GIR_Y (16 bits)][GIR_Z (16 bits)]
+    # - Event         [type (0b10) (2 bits)][timestamp abs (36 bits)][event ID (4 bits)]
+    # - Status        [type (0b11) (2 bits)] TBD
+    # TODO: Write packet parsers
+    def __parse_electrode(self, packet):
+        raise RuntimeError("__parse_electrode_packet: Not implemented")
+
+    def __parse_accelerometer(self, packet):
+        raise RuntimeError("__parse_accelerometer_packet: Not implemented")
+
+    def __parse_event(self, packet):
+        raise RuntimeError("__parse_event_packet: Not implemented")
+
+    def __parse_status(self, packet):
+        raise RuntimeError("__parse_status_packet: Not implemented")
+
     def __stream_filler(self):
         while self.__active:
-            packet = self.__udp.recv(4)
-            match packet[0] & 0xF0:
-                case 0x10: # Accelerometer packet
-                    self.__accelerometer_pipe_in.send((int(packet[1]), int(packet[2]), int(packet[3])))
-                case 0x20: # Electrode packet
-                    self.__electrode_pipe_in[(packet[0] & 0x0F)].send(int.from_bytes(packet[1:], "little"))
+            packet = self.__udp.recv(8)
+            print(packet, len(packet))
+            match (packet[0] & 0b11000000) >> 6:
+                case 0b00: # Electrode packet
+                    self.__parse_electrode(packet)
+                    # self.__electrode_pipe_in[(packet[0] & 0x0F)].send(int.from_bytes(packet[1:], "little"))
+                case 0b01: # Accelerometer packet
+                    self.__parse_accelerometer(packet)
+                case 0b10:
+                    self.__parse_event(packet)
+                case 0b11:
+                    self.__parse_accelerometer(packet)
 
     def start(self):
         self.__udp.sendto("start".encode(), self.__remote_address)
@@ -89,7 +110,6 @@ if __name__ == '__main__':
     eeg = FreeEEG() # FreeEEG("127.0.0.1", 4321)
 
     def signal_handler(sig, frame):
-        print(sig)
         global f
         f.close()
         eeg.stop()

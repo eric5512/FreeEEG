@@ -1,0 +1,6 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "ADS131M08IPBS")(type "KiCad")(uri "${KIPRJMOD}/lib/ADS131M08IPBS/ADS131M08IPBS.kicad_sym")(options "")(descr ""))
+  (lib (name "USBLC6-2SC6")(type "KiCad")(uri "${KIPRJMOD}/lib/USBLC6-2SC6/USBLC6-2SC6.kicad_sym")(options "")(descr ""))
+  (lib (name "AD8421ARMZ")(type "KiCad")(uri "${KIPRJMOD}/lib/AD8421ARMZ/AD8421ARMZ.kicad_sym")(options "")(descr ""))
+)

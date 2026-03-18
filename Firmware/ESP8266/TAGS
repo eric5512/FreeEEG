@@ -1,0 +1,234 @@
+
+.pio/libdeps/nodemcuv2/SparkFun Toolkit/src/sfeTk/sfeTkII2C.h,317
+class sfeTkII2C 37,1464
+    sfeTkII2C(44,1628
+    sfeTkII2C(52,1802
+    virtual void setAddress(70,2273
+    virtual uint8_t address(81,2551
+    virtual void setStop(91,2823
+    virtual bool stop(102,3097
+    static constexpr uint8_t kNoAddress 110,3251
+    uint8_t _address;113,3308
+    bool _stop;114,3330
+
+.pio/libdeps/nodemcuv2/SparkFun Toolkit/src/sfeTk/sfeTkISPI.h,207
+class sfeTkISPI 37,1443
+    sfeTkISPI(44,1623
+    sfeTkISPI(54,1849
+    virtual void setCS(64,2073
+    virtual uint8_t cs(75,2331
+    static constexpr uint8_t kNoCSPin 83,2522
+    uint8_t _cs;87,2625
+
+.pio/libdeps/nodemcuv2/SparkFun Toolkit/src/sfeTk/sfeTkIBus.h,412
+const sfeTkError_t kSTkErrBusNotInit 42,1483
+const sfeTkError_t kSTkErrBusTimeout 47,1615
+const sfeTkError_t kSTkErrBusNoResponse 52,1754
+const sfeTkError_t kSTkErrBusDataTooLong 57,1923
+const sfeTkError_t kSTkErrBusNullSettings 62,2092
+const sfeTkError_t kSTkErrBusNullBuffer 67,2236
+const sfeTkError_t kSTkErrBusUnderRead 72,2378
+const sfeTkError_t kSTkErrBusNotEnabled 77,2504
+class sfeTkIBus86,2887
+
+.pio/libdeps/nodemcuv2/SparkFun Toolkit/src/sfeTk/sfeTkError.h,159
+typedef int32_t sfeTkError_t;48,1804
+const sfeTkError_t kSTkErrFail 55,1936
+const sfeTkError_t kSTkErrOk 59,2059
+const sfeTkError_t kSTkErrBaseBus 64,2214
+
+.pio/libdeps/nodemcuv2/SparkFun Toolkit/src/sfeTkArdSPI.cpp,927
+#define kSPIReadBit 34,1513
+sfeTkError_t sfeTkArdSPI::init(init41,1708
+sfeTkError_t sfeTkArdSPI::init(init65,2235
+sfeTkError_t sfeTkArdSPI::init(init79,2719
+sfeTkError_t sfeTkArdSPI::writeByte(writeByte91,2976
+sfeTkError_t sfeTkArdSPI::writeWord(writeWord118,3579
+sfeTkError_t sfeTkArdSPI::writeRegion(writeRegion131,3928
+sfeTkError_t sfeTkArdSPI::writeRegisterByte(writeRegisterByte158,4563
+sfeTkError_t sfeTkArdSPI::writeRegisterWord(writeRegisterWord186,5206
+sfeTkError_t sfeTkArdSPI::writeRegisterRegion(writeRegisterRegion197,5598
+sfeTkError_t sfeTkArdSPI::writeRegister16Region(writeRegister16Region221,6154
+sfeTkError_t sfeTkArdSPI::readRegisterByte(readRegisterByte243,6684
+sfeTkError_t sfeTkArdSPI::readRegisterWord(readRegisterWord251,6961
+sfeTkError_t sfeTkArdSPI::readRegisterRegion(readRegisterRegion265,7458
+sfeTkError_t sfeTkArdSPI::readRegister16Region(readRegister16Region298,8348
+
+.pio/libdeps/nodemcuv2/SparkFun Toolkit/src/sfeTkArdI2C.cpp,1130
+sfeTkError_t sfeTkArdI2C::init(init31,1300
+sfeTkError_t sfeTkArdI2C::init(init52,1780
+sfeTkError_t sfeTkArdI2C::init(init67,2169
+sfeTkError_t sfeTkArdI2C::ping(ping77,2438
+sfeTkError_t sfeTkArdI2C::writeByte(writeByte94,2888
+sfeTkError_t sfeTkArdI2C::writeWord(writeWord112,3401
+sfeTkError_t sfeTkArdI2C::writeRegion(writeRegion127,3804
+sfeTkError_t sfeTkArdI2C::writeRegisterByte(writeRegisterByte139,4178
+sfeTkError_t sfeTkArdI2C::writeRegisterWord(writeRegisterWord158,4726
+sfeTkError_t sfeTkArdI2C::writeRegisterRegionAddress(writeRegisterRegionAddress175,5335
+sfeTkError_t sfeTkArdI2C::writeRegisterRegion(writeRegisterRegion198,6055
+sfeTkError_t sfeTkArdI2C::writeRegister16Region(writeRegister16Region210,6479
+sfeTkError_t sfeTkArdI2C::readRegisterRegionAnyAddress(readRegisterRegionAnyAddress228,7179
+sfeTkError_t sfeTkArdI2C::readRegisterByte(readRegisterByte293,9223
+sfeTkError_t sfeTkArdI2C::readRegisterWord(readRegisterWord327,10150
+sfeTkError_t sfeTkArdI2C::readRegisterRegion(readRegisterRegion345,10735
+sfeTkError_t sfeTkArdI2C::readRegister16Region(readRegister16Region357,11183
+
+.pio/libdeps/nodemcuv2/SparkFun Toolkit/src/sfeTkArdSPI.h,232
+class sfeTkArdSPI 36,1335
+    sfeTkArdSPI(42,1468
+    sfeTkArdSPI(51,1655
+    sfeTkArdSPI(59,1855
+    sfeTkArdSPI &operator=(operator=69,2209
+    SPIClass *_spiPort;_spiPort232,7682
+    SPISettings _sfeSPISettings;235,7776
+
+.pio/libdeps/nodemcuv2/SparkFun Toolkit/src/sfeTkArdI2C.h,360
+class sfeTkArdI2C 40,1480
+    sfeTkArdI2C(46,1571
+    sfeTkArdI2C(54,1753
+    sfeTkArdI2C(61,1861
+    sfeTkArdI2C &operator=(operator=71,2118
+    void setBufferChunkSize(251,7350
+    size_t bufferChunkSize(263,7572
+    TwoWire *_i2cPort;_i2cPort273,7847
+    static constexpr size_t kDefaultBufferChunk 282,8215
+    size_t _bufferChunkSize;285,8316
+
+.pio/libdeps/nodemcuv2/SparkFun ADS1219 Arduino Library/src/SparkFun_ADS1219.cpp,1015
+bool SfeADS1219Driver::begin(begin27,611
+bool SfeADS1219Driver::reset(reset42,1073
+bool SfeADS1219Driver::startSync(startSync49,1270
+bool SfeADS1219Driver::powerDown(powerDown56,1468
+bool SfeADS1219Driver::setConversionMode(setConversionMode63,1674
+bool SfeADS1219Driver::setInputMultiplexer(setInputMultiplexer74,2283
+bool SfeADS1219Driver::setGain(setGain85,2884
+bool SfeADS1219Driver::setDataRate(setDataRate97,3628
+bool SfeADS1219Driver::setVoltageReference(setVoltageReference108,4219
+bool SfeADS1219Driver::readConversion(readConversion120,4899
+float SfeADS1219Driver::getConversionMillivolts(getConversionMillivolts150,6126
+int32_t SfeADS1219Driver::getConversionRaw(getConversionRaw163,6697
+bool SfeADS1219Driver::dataReady(dataReady170,6847
+bool SfeADS1219Driver::getConfigurationRegister(getConfigurationRegister180,7302
+bool SfeADS1219Driver::setConfigurationRegister(setConfigurationRegister188,7726
+void SfeADS1219Driver::setCommunicationBus(setCommunicationBus196,8217
+
+.pio/libdeps/nodemcuv2/SparkFun ADS1219 Arduino Library/src/SparkFun_ADS1219.h,1975
+const uint8_t kDefaultADS1219Addr 36,953
+    ADS1219_CONFIG_MUX_DIFF_P0_N1 54,1623
+    ADS1219_CONFIG_MUX_DIFF_P2_N3,55,1662
+    ADS1219_CONFIG_MUX_DIFF_P1_N2,56,1697
+    ADS1219_CONFIG_MUX_SINGLE_0,57,1732
+    ADS1219_CONFIG_MUX_SINGLE_1,58,1765
+    ADS1219_CONFIG_MUX_SINGLE_2,59,1798
+    ADS1219_CONFIG_MUX_SINGLE_3,60,1831
+    ADS1219_CONFIG_MUX_SHORTED61,1864
+} ads1219_input_multiplexer_config_t;62,1895
+    ADS1219_GAIN_1 67,2002
+    ADS1219_GAIN_468,2026
+} ads1219_gain_config_t;69,2045
+    ADS1219_DATA_RATE_20SPS 74,2147
+    ADS1219_DATA_RATE_90SPS,75,2180
+    ADS1219_DATA_RATE_330SPS,76,2209
+    ADS1219_DATA_RATE_1000SPS77,2239
+} ads1219_data_rate_config_t;78,2269
+    ADS1219_CONVERSION_SINGLE_SHOT 83,2379
+    ADS1219_CONVERSION_CONTINUOUS84,2419
+} ads1219_conversion_mode_config_t;85,2453
+    ADS1219_VREF_INTERNAL 92,2646
+    ADS1219_VREF_EXTERNAL93,2677
+} ads1219_vref_config_t;94,2703
+const uint8_t kSfeADS1219RegConfigWrite 100,2928
+const uint8_t kSfeADS1219RegConfigRead 101,3006
+        uint8_t vref 109,3243
+        uint8_t cm 110,3335
+        uint8_t dr 111,3425
+        uint8_t gain 112,3512
+        uint8_t mux 113,3591
+    uint8_t byte;115,3693
+} sfe_ads1219_reg_cfg_t;116,3711
+const uint8_t kSfeADS1219RegStatusRead 122,3929
+        uint8_t id 130,4165
+        uint8_t drdy 131,4288
+    uint8_t byte;133,4377
+} sfe_ads1219_reg_status_t;134,4395
+const uint8_t kSfeADS1219CommandReset 140,4608
+const uint8_t kSfeADS1219CommandStartSync 141,4678
+const uint8_t kSfeADS1219CommandPowerDown 142,4760
+const uint8_t kSfeADS1219CommandReadData 143,4835
+class SfeADS1219Driver147,5002
+    SfeADS1219Driver(151,5134
+    sfeTkArdI2C *_theBus;_theBus229,8489
+    ads1219_gain_config_t _adcGain;231,8542
+    int32_t _adcResult;233,8649
+class SfeADS1219ArdI2C 236,8746
+    SfeADS1219ArdI2C(239,8805
+    bool begin(245,9001
+    bool begin(259,9448
+    bool begin(273,9901
+    sfeTkArdI2C _theI2CBus;286,10230
+
+lib/ConfigServer/ConfigServer.cpp,180
+void ConfigServer::on_root(on_root6,72
+void ConfigServer::on_config(on_config10,167
+void ConfigServer::init(init18,392
+void ConfigServer::handle_client(handle_client24,539
+
+lib/ConfigServer/ConfigServer.h,85
+class ConfigServer 6,70
+    ESP8266WebServer server;8,100
+    ConfigServer(13,180
+
+lib/DataServer/DataServer.h,158
+#define UDP_PORT 6,57
+class DataServer 8,78
+    WiFiUDP udp;10,106
+    uint8_t active;11,123
+    IPAddress user_ip;12,143
+    uint16_t user_port;13,166
+
+lib/DataServer/DataServer.cpp,181
+uint8_t DataServer::init(init3,25
+uint8_t DataServer::is_active(is_active8,105
+void DataServer::recv_packet(recv_packet12,161
+void DataServer::send_packet(send_packet29,620
+
+lib/index_html/index_html.h,78
+unsigned char index_html[index_html1,0
+unsigned int index_html_len 31,2039
+
+lib/Config/Config.cpp,214
+uint8_t Config::electrodes[Config::electrodes5,42
+uint32_t Config::sample_rate 6,90
+uint8_t Config::precission 7,127
+void Config::send_config(send_config9,161
+void Config::update_config(update_config13,194
+
+lib/Config/Config.h,261
+struct Config 5,37
+    static const uint8_t N_ELECTRODES 6,53
+    static uint8_t electrodes[electrodes7,96
+    static uint32_t sample_rate;8,141
+    static uint8_t precission;9,174
+    static void send_config(11,206
+    static void update_config(12,237
+
+lib/EOS/EOS.h,16
+class EOS 4,15
+
+src/main.cpp,199
+#define DEBUG7,103
+ConfigServer cs;13,189
+DataServer ds;14,206
+bool act 16,222
+SfeADS1219ArdI2C adc;18,241
+void setup(20,264
+	IPAddress myIP 33,540
+	uint8_t ds_init 44,714
+void loop(65,1084
+
+include/credentials.h,18
+#define SSID 1,0
+
+.pio/libdeps/nodemcuv2/SparkFun Toolkit/src/SparkFun_Toolkit.h,0
+
+.pio/libdeps/nodemcuv2/SparkFun Toolkit/src/sfeTk/sfeToolkit.h,0

@@ -1,0 +1,25 @@
+
+test_udp.py,27
+def electrode_packet(4,27
+
+FreeEEG.py,502
+class FreeEEG:FreeEEG9,148
+    def __init__(13,412
+    def get_electrode_generator(30,1102
+        def block(32,1229
+        def nonblock(36,1343
+    def get_accelerometer_generator(47,1633
+        def block(48,1700
+        def nonblock(51,1804
+    def __parse_electrode(66,2580
+    def __parse_accelerometer(69,2694
+    def __parse_event(72,2816
+    def __parse_status(75,2922
+    def __stream_filler(78,3030
+    def start(93,3687
+    def stop(99,3919
+    def signal_handler(112,4219
+
+test_metadata.py,0
+
+plot_test.py,0
