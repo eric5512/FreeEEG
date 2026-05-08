@@ -1,6 +1,9 @@
 (fp_lib_table
   (version 7)
-  (lib (name "ADS131M08IPBS")(type "KiCad")(uri "${KIPRJMOD}/lib/ADS131M08IPBS")(options "")(descr ""))
-  (lib (name "USBLC6-2SC6")(type "KiCad")(uri "${KIPRJMOD}/lib/USBLC6-2SC6")(options "")(descr ""))
-  (lib (name "AD8421ARMZ")(type "KiCad")(uri "${KIPRJMOD}/lib/AD8421ARMZ")(options "")(descr ""))
+  (lib (name "TC5050RGBF08-3CJH-AF53A")(type "KiCad")(uri "${KIPRJMOD}/lib/LIB_TC5050RGBF08-3CJH-AF53A")(options "")(descr ""))
+  (lib (name "TF-01A")(type "KiCad")(uri "${KIPRJMOD}/lib/LIB_TF-01A")(options "")(descr ""))
+  (lib (name "10137065-00021LF")(type "KiCad")(uri "${KIPRJMOD}/lib/LIB_10137065-00021LF")(options "")(descr ""))
+  (lib (name "XL-3528RGBW-HM")(type "KiCad")(uri "${KIPRJMOD}/lib/LIB_XL-3528RGBW-HM/XL-3528RGBW-HM.pretty")(options "")(descr ""))
+  (lib (name "K3-1260D-L1")(type "KiCad")(uri "${KIPRJMOD}/lib/LIB_K3-1260D-L1/K3-1260D-L1.pretty")(options "")(descr ""))
+  (lib (name "K2-1187SQ-A4SW-06")(type "KiCad")(uri "${KIPRJMOD}/lib/LIB_K2-1187SQ-A4SW-06/K2-1187SQ-A4SW-06.pretty")(options "")(descr ""))
 )

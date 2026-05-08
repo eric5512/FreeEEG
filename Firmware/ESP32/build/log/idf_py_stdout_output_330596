@@ -1,0 +1,8 @@
+Command: ninja all
+[1/4] cd /home/eric/Documents/GitHub/FreeEEG/Firmware/ESP32/build && /home/eric/.espressif/tools/python/v6.0.1/venv/bin/python /home/eric/.espressif/v6.0.1/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /home/eric/Documents/GitHub/FreeEEG/Firmware/ESP32/build/partition_table/partition-table.bin /home/eric/Documents/GitHub/FreeEEG/Firmware/ESP32/build/ESP32.bin
+ESP32.bin binary size 0x21dc0 bytes. Smallest app partition is 0x100000 bytes. 0xde240 bytes (87%) free.
+[2/4] Performing build step for 'bootloader'
+[1/1] cd /home/eric/Documents/GitHub/FreeEEG/Firmware/ESP32/build/bootloader && /home/eric/.espressif/tools/python/v6.0.1/venv/bin/python /home/eric/.espressif/v6.0.1/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x1000 /home/eric/Documents/GitHub/FreeEEG/Firmware/ESP32/build/bootloader/bootloader.bin
+Bootloader binary size 0x6610 bytes. 0x9f0 bytes (9%) free.
+[3/4] No install step for 'bootloader'
+[4/4] Completed 'bootloader'

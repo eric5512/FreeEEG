@@ -1,0 +1,34 @@
+<title>Configuration</title>
+<h1>Configuration page</h1>
+<form action="/action_page.php">
+    <p>Electrodes on/off:</p>
+    <input type="checkbox" id="electrode1" name="electrode1" value="electrode1">
+    <label for="electrode1">Electrode 1 </label><br>
+    <input type="checkbox" id="electrode2" name="electrode2" value="electrode2">
+    <label for="electrode2">Electrode 2 </label><br>
+    <input type="checkbox" id="electrode3" name="electrode3" value="electrode3">
+    <label for="electrode3">Electrode 3 </label><br>
+    <input type="checkbox" id="electrode4" name="electrode4" value="electrode4">
+    <label for="electrode4">Electrode 4 </label><br>
+    <input type="checkbox" id="electrode5" name="electrode5" value="electrode5">
+    <label for="electrode5">Electrode 5 </label><br>
+    <input type="checkbox" id="electrode6" name="electrode6" value="electrode6">
+    <label for="electrode6">Electrode 6 </label><br>
+    <input type="checkbox" id="electrode7" name="electrode7" value="electrode7">
+    <label for="electrode7">Electrode 7 </label><br>
+    <input type="checkbox" id="electrode8" name="electrode8" value="electrode8">
+    <label for="electrode8">Electrode 8 </label><br>
+    <br>
+
+    <p>Notch filter frequency:</p>
+    <input type="radio" id="eu" name="filt_freq" value="EU" checked>
+    <label for="eu">50 Hz</label><br>
+    <input type="radio" id="us" name="filt_freq" value="US">
+    <label for="us">60 Hz</label><br>
+    <br>
+
+    <p>Use common reference for all electrodes <input type="checkbox" id="common" name="common" value="common"></p>
+    <br>
+
+    <input type="submit" value="Send configuration">
+</form>

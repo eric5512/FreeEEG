@@ -58,10 +58,10 @@ class FreeEEG:
         return block if blocking else nonblock
 
     # Packet types:
-    # - Electrode     [type (0b00) (2 bits)][timestamp rel (24 bits)][value (24 bits)]* <- Variable lenght depending on num of channels active
-    # - Accelerometer [type (0b01) (2 bits)][timestamp rel (24 bits)][ACC_X (16 bits)][ACC_Y (16 bits)][ACC_Z (16 bits)][GIR_X (16 bits)][GIR_Y (16 bits)][GIR_Z (16 bits)]
-    # - Event         [type (0b10) (2 bits)][timestamp abs (36 bits)][event ID (4 bits)]
-    # - Status        [type (0b11) (2 bits)] TBD
+    # - Electrode     [padding (6 bits)][type (0b00) (2 bits)][timestamp rel (24 bits)][value (24 bits)]* <- Variable lenght depending on num of channels active
+    # - Accelerometer [padding (6 bits)][type (0b01) (2 bits)][timestamp rel (24 bits)][ACC_X (16 bits)][ACC_Y (16 bits)][ACC_Z (16 bits)][GIR_X (16 bits)][GIR_Y (16 bits)][GIR_Z (16 bits)]
+    # - Event         [padding (6 bits)][type (0b10) (2 bits)][timestamp abs (36 bits)][event ID (4 bits)]
+    # - Status        [padding (6 bits)][type (0b11) (2 bits)][electrode status (8 bits)][battery reading (12 bits)]
     # TODO: Write packet parsers
     def __parse_electrode(self, packet):
         raise RuntimeError("__parse_electrode_packet: Not implemented")
@@ -79,16 +79,15 @@ class FreeEEG:
         while self.__active:
             packet = self.__udp.recv(8)
             print(packet, len(packet))
-            match (packet[0] & 0b11000000) >> 6:
+            match packet[0] & 0b00000011:
                 case 0b00: # Electrode packet
                     self.__parse_electrode(packet)
-                    # self.__electrode_pipe_in[(packet[0] & 0x0F)].send(int.from_bytes(packet[1:], "little"))
                 case 0b01: # Accelerometer packet
                     self.__parse_accelerometer(packet)
-                case 0b10:
+                case 0b10: # Event packet
                     self.__parse_event(packet)
-                case 0b11:
-                    self.__parse_accelerometer(packet)
+                case 0b11: # Status packet
+                    self.__parse_status(packet)
 
     def start(self):
         self.__udp.sendto("start".encode(), self.__remote_address)
@@ -149,19 +148,15 @@ if __name__ == '__main__':
     
     # --- simulate incoming samples ---
     idx = 0
-    electrode_stream = eeg.get_electrode_generator(0, blocking=True)
+    data_stream = eeg.get_data_generator(blocking=True)
 
     f = open("test.csv", "w+")
     eeg.start()
     print("Starting EEG...")
-    for i in electrode_stream():
-        f.write(str(i)) # type: ignore
-        f.write(",")
+    f.write("timestamp,e1,e2,e3,e4,e5,e6,e7,e8,ax,ay,az,gx,gy,gz,event\n")
+    for i in data_stream():
+        f.write(i.as_csv() + "\n")
 
-        t = time.time()
-        print(f"Delta: {t-last}, value: {i}")
-        last = time.time()
-        
         
         # if len(data) < freq*2:
         #     data.append(i)
