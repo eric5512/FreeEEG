@@ -1,9 +1,0 @@
-Command: cmake -G Ninja -B /home/eric/Documents/GitHub/FreeEEG/Firmware/ESP32/build -DPYTHON_DEPS_CHECKED=1 -DPYTHON=/home/eric/.espressif/tools/python/v6.0.1/venv/bin/python -DESP_PLATFORM=1 -DCCACHE_ENABLE=False /home/eric/Documents/GitHub/FreeEEG/Firmware/ESP32
-Configuration Report               
- ───────────────────────────────── 
-   Parser Version: 1               
-   Verbosity: default              
-   Defaults policy: sdkconfig      
-   Status: Finished successfully   
-                                   
- ───────────────────────────────── 

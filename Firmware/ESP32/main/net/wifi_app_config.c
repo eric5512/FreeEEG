@@ -1,0 +1,95 @@
+#include "wifi_app.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include "esp_err.h"
+#include "esp_log.h"
+#include "esp_http_server.h"
+
+#include "config.h"
+#include "index.html.h"
+
+#define TAG "wifi_http"
+
+#define MIN(a,b) ((a < b) ? a : b)
+
+static httpd_handle_t http_server = NULL;
+
+static esp_err_t http_root_handler(httpd_req_t *req) {
+  httpd_resp_set_type(req, "text/html");
+  return httpd_resp_send(req, (const char *) net_index_html, net_index_html_len);
+}
+
+static esp_err_t http_update_handler(httpd_req_t *req)
+{
+    char content[128];
+
+    int recv_len = httpd_req_recv(
+        req,
+        content,
+        MIN(req->content_len, sizeof(content) - 1)
+    );
+
+    if (recv_len <= 0) {
+        return ESP_FAIL;
+    }
+
+    content[recv_len] = '\0';
+
+    ESP_LOGI(TAG, "POST content: %s\n", content);
+
+    const uint8_t BUFF_LEN = 32;
+    char buff[BUFF_LEN];
+
+    config_t config = {0};
+    
+    char *electrode_names[8] = {"electrode1", "electrode2", "electrode3", "electrode4", "electrode5", "electrode6", "electrode7", "electrode8"};
+    for (uint8_t i = 0; i < 8; ++i) if (httpd_query_key_value(content, electrode_names[i], buff, BUFF_LEN) == ESP_OK) {
+        config.electrodes[i] = true;
+    }
+
+    log_config(&config);
+    
+    httpd_resp_sendstr(req, "Configuration updated");
+
+    return ESP_OK;
+}
+
+void wifi_http_start(void) {
+  if (http_server != NULL) {
+    return;
+  }
+
+  httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+  config.server_port = 80;
+
+  ESP_ERROR_CHECK(httpd_start(&http_server, &config));
+
+  httpd_uri_t root_uri = {
+    .uri = "/",
+    .method = HTTP_GET,
+    .handler = http_root_handler,
+    .user_ctx = NULL,
+  };
+
+  httpd_uri_t update_uri = {
+    .uri = "/update_config",
+    .method = HTTP_POST,
+    .handler = http_update_handler,
+    .user_ctx = NULL,
+  };
+  
+  ESP_ERROR_CHECK(httpd_register_uri_handler(http_server, &root_uri));
+  ESP_ERROR_CHECK(httpd_register_uri_handler(http_server, &update_uri));
+
+  ESP_LOGI(TAG, "HTTP server initialized");
+}
+
+void wifi_http_stop(void) {
+  if (http_server != NULL) {
+    ESP_ERROR_CHECK_WITHOUT_ABORT(httpd_stop(http_server));
+    http_server = NULL;
+  }
+}

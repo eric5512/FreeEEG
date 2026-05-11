@@ -1,6 +1,6 @@
 <title>Configuration</title>
 <h1>Configuration page</h1>
-<form action="/action_page.php">
+<form action="/update_config" method="post">
     <p>Electrodes on/off:</p>
     <input type="checkbox" id="electrode1" name="electrode1" value="electrode1">
     <label for="electrode1">Electrode 1 </label><br>
@@ -27,6 +27,17 @@
     <label for="us">60 Hz</label><br>
     <br>
 
+    <label for="rate">Choose a sampling rate:</label>
+    <select name="rate" id="rate">
+      <option value="250">250 SPS</option>
+      <option value="500">500 SPS</option>
+      <option value="1000">1000 SPS</option>
+      <option value="2000">2000 SPS</option>
+      <option value="4000">4000 SPS</option>
+      <option value="8000">8000 SPS</option>
+    </select>
+    <br>
+    
     <p>Use common reference for all electrodes <input type="checkbox" id="common" name="common" value="common"></p>
     <br>
 

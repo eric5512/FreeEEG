@@ -1,6 +1,0 @@
--Wno-frame-address
--mlongcalls
--fno-builtin-memcpy
--fno-builtin-memset
--fno-builtin-bzero
-"-specs=/home/eric/Documents/GitHub/FreeEEG/Firmware/ESP32/build/specs/picolibc.specs"
