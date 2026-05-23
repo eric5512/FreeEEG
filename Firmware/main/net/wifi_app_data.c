@@ -15,6 +15,27 @@
 static int udp_sock = -1;
 static struct sockaddr_in udp_dest_addr;
 
+static void wifi_udp_send_packet(const uint8_t* data, uint8_t data_len) {
+    if (udp_sock < 0 || data == NULL || data_len == 0) {
+        return;
+    }
+
+    udp_dest_addr.sin_port = htons(6969);
+    
+    int err = sendto(
+        udp_sock,
+        data,
+        data_len,
+        0,
+        (struct sockaddr *)&udp_dest_addr,
+        sizeof(udp_dest_addr)
+    );
+
+    if (err < 0) {
+        ESP_LOGE(TAG, "UDP send failed: errno=%d", errno);
+    }
+}
+
 void wifi_udp_start(void) {
     if (udp_sock >= 0) {
         close(udp_sock);
@@ -59,31 +80,21 @@ void wifi_udp_stop(void) {
     }
 }
 
-void wifi_udp_send_packet(const uint8_t* data, uint8_t data_len) {
-    if (udp_sock < 0 || data == NULL || data_len == 0) {
-        return;
-    }
+/* void wifi_udp_send_data(const udp_packet_t* data) { */
+/*   uint8_t buff[sizeof(udp_packet_t)]; */
 
-    int err = sendto(
-        udp_sock,
-        data,
-        data_len,
-        0,
-        (struct sockaddr *)&udp_dest_addr,
-        sizeof(udp_dest_addr)
-    );
+  
+/* } */
 
-    if (err < 0) {
-        ESP_LOGE(TAG, "UDP send failed: errno=%d", errno);
-    }
+void wifi_udp_send_data(const uint32_t* data) {
+  wifi_udp_send_packet((const uint8_t*) data, sizeof(uint32_t));
 }
 
-void wifi_udp_recv_packet(uint8_t *buffer) {
+bool wifi_udp_recv_packet(uint8_t *buffer) {
     if (udp_sock < 0 || buffer == NULL) {
-        return;
+        return false;
     }
 
-    struct sockaddr_in source_addr;
     socklen_t socklen = sizeof(udp_dest_addr);
 
     int len = recvfrom(
@@ -101,5 +112,10 @@ void wifi_udp_recv_packet(uint8_t *buffer) {
         ESP_LOGI(TAG, "UDP packet received from %s:%u",
                  inet_ntoa(udp_dest_addr.sin_addr),
                  udp_dest_addr.sin_port);
+
+
+	return true;
     }
+
+    return false;
 }

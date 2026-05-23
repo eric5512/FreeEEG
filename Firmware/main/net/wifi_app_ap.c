@@ -10,7 +10,7 @@
 #include "esp_netif.h"
 #include "nvs_flash.h"
 
-#define TAG "wifi_ap"
+#define TAG "wifi_app"
 
 char wifi_ap_ip[16] = "192.168.1.1";
 

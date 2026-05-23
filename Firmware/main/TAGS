@@ -1,0 +1,209 @@
+
+drivers/mpu6050.c,921
+#define TAG 14,204
+#define MPU6050_I2C_PORT 16,227
+#define MPU6050_I2C_FREQ_HZ 17,267
+#define MPU6050_ADDR 18,304
+#define MPU6050_REG_SMPLRT 20,340
+#define MPU6050_REG_CONFIG 21,375
+#define MPU6050_REG_GYRO_CFG 22,410
+#define MPU6050_REG_ACCEL_CFG 23,445
+#define MPU6050_REG_INT_EN 24,480
+#define MPU6050_REG_INT_CFG 25,515
+#define MPU6050_REG_ACCEL_X_H 26,550
+#define MPU6050_REG_PWR_MGMT1 27,585
+#define MPU6050_REG_WHO_AM_I 28,620
+static bool mpu_running 30,656
+static gpio_num_t mpu_int_pin 32,690
+static i2c_master_bus_handle_t i2c_bus_handle 36,783
+static i2c_master_dev_handle_t mpu_dev_handle 37,837
+static esp_err_t mpu6050_write_reg(39,892
+static esp_err_t mpu6050_read_regs(51,1119
+static uint8_t mpu6050_read_reg(63,1345
+static void IRAM_ATTR mpu6050_isr_handler(76,1579
+void mpu6050_init(83,1707
+void mpu6050_start(174,4349
+void mpu6050_stop(187,4669
+void mpu6050_read_data(195,4859
+
+drivers/RGB_LED.c,136
+static uint8_t RGB_PIN_R;5,48
+static uint8_t RGB_PIN_G;6,74
+static uint8_t RGB_PIN_B;7,100
+void RGB_init(9,127
+void RGB_set(20,422
+
+drivers/ads1299.c,1343
+static const char* TAG 12,226
+#define ADS1299_SPI_HOST 14,263
+#define ADS1299_SPI_FREQ_HZ 15,298
+#define ADS1299_CMD_WAKEUP 17,335
+#define ADS1299_CMD_STANDBY 18,368
+#define ADS1299_CMD_RESET 19,401
+#define ADS1299_CMD_START 20,434
+#define ADS1299_CMD_STOP 21,467
+#define ADS1299_CMD_RDATAC 22,500
+#define ADS1299_CMD_SDATAC 23,533
+#define ADS1299_CMD_RDATA 24,566
+#define ADS1299_CMD_RREG 25,599
+#define ADS1299_CMD_WREG 26,632
+#define ADS1299_REG_ID 28,666
+#define	ADS1299_REG_CONFIG1	29,703
+#define ADS1299_REG_CONFIG2	30,736
+#define ADS1299_REG_CONFIG3	31,769
+#define ADS1299_REG_CH1SET	32,802
+#define ADS1299_REG_BIAS_SENSP	33,834
+#define ADS1299_REG_BIAS_SENSN	34,870
+#define ADS1299_REG_MISC1	35,906
+#define ADS1299_FRAME_SIZE 37,938
+static gpio_num_t ads1299_drdy_pin 39,969
+static spi_device_handle_t ads_spi 42,1071
+static volatile bool ads_running 43,1114
+static uint16_t ads_sample_rate 44,1156
+static void ads1299_spi_txrx(46,1196
+static void ads1299_cmd(56,1423
+static void ads1299_write_reg(61,1532
+static uint8_t ads1299_read_register(72,1743
+static uint8_t ads1299_sample_rate_bits(88,1985
+static void IRAM_ATTR ads1299_drdy_isr_handler(101,2319
+void ads1299_init(105,2409
+void ads1299_send_config(196,4684
+void ads1299_start(259,6335
+void ads1299_stop(267,6492
+void ads1299_read(274,6613
+
+net/wifi_app_config.c,229
+#define TAG 14,200
+#define MIN(16,225
+static httpd_handle_t http_server 18,261
+static esp_err_t http_root_handler(20,304
+static esp_err_t http_update_handler(25,485
+void wifi_http_start(60,1336
+void wifi_http_stop(90,2015
+
+net/config.c,92
+#define TAG 5,43
+void send_config(7,65
+void update_config(11,110
+void log_config(15,188
+
+net/wifi_app_data.c,298
+#define TAG 11,135
+#define WIFI_UDP_LOCAL_PORT 13,159
+static int udp_sock 15,191
+static struct sockaddr_in udp_dest_addr;16,217
+void wifi_udp_start(18,259
+void wifi_udp_stop(55,1190
+void wifi_udp_send_data(62,1299
+static void wifi_udp_send_packet(68,1396
+bool wifi_udp_recv_packet(87,1801
+
+net/wifi_app_ap.c,211
+#define TAG 13,197
+char wifi_ap_ip[wifi_ap_ip15,221
+static bool netif_initialized 17,259
+static bool wifi_initialized 18,298
+void wifi_ap_init(20,337
+void wifi_ap_start(70,1823
+void wifi_ap_stop(84,2080
+
+tasks/tasks.c,1261
+#define TAG 12,154
+#define ADS1299_PIN_MOSI	14,175
+#define ADS1299_PIN_MISO	15,204
+#define ADS1299_PIN_SCK	16,232
+#define ADS1299_PIN_DRDY	17,260
+#define ADS1299_PIN_CS	18,288
+#define ADS1299_PIN_START	19,315
+#define RGB_PIN_R	21,345
+#define RGB_PIN_G	22,366
+#define RGB_PIN_B	23,387
+#define MPU6050_PIN_SDA	25,409
+#define MPU6050_PIN_SCL	26,436
+#define MPU6050_PIN_INT	27,463
+#define SDCARD_PIN_DAT0 29,491
+#define SDCARD_PIN_DAT1 30,517
+#define SDCARD_PIN_DAT2 31,543
+#define SDCARD_PIN_DAT3 32,569
+#define SDCARD_PIN_CMD 33,595
+#define SDCARD_PIN_CLK 34,621
+#define SDCARD_PIN_CD 35,647
+#define BATTERY_PIN	37,674
+#define SWITCH_PIN 39,697
+#define EVENT_BIT_OFFLINE_MEAS 41,725
+#define EVENT_BIT_ONLINE_MODE	42,764
+#define EVENT_BIT_ONLINE_MEAS	43,801
+#define EVENT_BIT_IDLE	44,838
+#define EVENT_BIT_IMU_AVAIL	45,869
+#define EVENT_BIT_AFE_AVAIL	46,904
+static EventGroupHandle_t event_group;49,941
+static RingbufHandle_t buff_afe;50,980
+static RingbufHandle_t buff_imu;51,1013
+static void imu_isr(53,1047
+static void afe_isr(57,1143
+static void IRAM_ATTR switch_isr(61,1239
+void tasks_init(71,1510
+void task_afe(108,2472
+void task_imu(115,2616
+void task_write(122,2760
+void task_config(133,3111
+void task_recv(139,3249
+
+include/ads1299.h,90
+    uint8_t status[status7,74
+    int32_t channel[channel8,97
+} ads1299_data_t;9,121
+
+include/wifi_app.h,338
+#define AP_NAME 7,73
+#define AP_PASSWD 8,101
+#define UDP_DATA_BUFF_SIZE 18,306
+  uint8_t num_elec;21,354
+  uint32_t elec_data[elec_data22,374
+  uint8_t num_imu;24,420
+  uint16_t accel_data[accel_data25,439
+  uint16_t gyro_data[gyro_data26,485
+  uint8_t num_events;28,531
+  uint8_t events[events29,553
+} udp_packet_t;30,591
+
+include/mpu6050.h,155
+  uint16_t x,6,54
+  uint16_t x, y,6,54
+  uint16_t x, y, z;6,54
+} tuple3_t;7,74
+  tuple3_t acc,10,104
+  tuple3_t acc, gyr;10,104
+} mpu_data_t;11,125
+
+include/index.html.h,92
+unsigned char net_index_html[net_index_html1,0
+unsigned int net_index_html_len 173,12587
+
+include/config.h,167
+#define NUM_ELECTRODES 6,58
+  uint16_t sample_rate;9,101
+  uint8_t filt_freq;10,125
+  bool electrodes[electrodes12,149
+  bool comm_ref;13,184
+} config_t;14,201
+
+include/state.h,57
+#define WIFI_ACTIVE 8,155
+#define OFFLINE_ACTIVE 9,187
+
+ESP32.c,212
+TaskHandle_t task_afe_handle;9,141
+TaskHandle_t task_imu_handle;10,171
+TaskHandle_t task_write_handle;11,201
+TaskHandle_t task_config_handle;12,233
+TaskHandle_t task_recv_handle;13,266
+void app_main(15,298
+
+include/sd_card.h,0
+
+include/RGB_LED.h,0
+
+include/tasks.h,0
+
+drivers/sd_card.c,0

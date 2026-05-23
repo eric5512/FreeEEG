@@ -7,10 +7,10 @@ import matplotlib
 import numpy as np
 
 class FreeEEG:
-    __slots__ = ('__udp', '__remote_address', '__local_address', '__electrode_pipe_in', 
-                 '__accelerometer_pipe_in', '__electrode_pipe_out', '__accelerometer_pipe_out', 
+    __slots__ = ('__udp', '__remote_address', '__local_address',
+                 '__pipe_in', '__pipe_out', 
                  '__filler_thread', '__active', 'N_ELECTRODE')
-    def __init__(self, remote_ip = "192.168.1.1", remote_port = 69, local_ip = "", local_port = 6969) -> None:
+    def __init__(self, remote_ip = "192.168.4.1", remote_port = 69, local_ip = "", local_port = 6969) -> None:
         self.N_ELECTRODE = 8
 
         self.__remote_address = (remote_ip, remote_port)
@@ -19,75 +19,32 @@ class FreeEEG:
         self.__udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.__udp.bind(self.__local_address)
 
-        (self.__accelerometer_pipe_in, self.__accelerometer_pipe_out) = Pipe()
-        self.__electrode_pipe_in = []
-        self.__electrode_pipe_out = []
-        for _ in range(self.N_ELECTRODE):
-            a, b = Pipe()
-            self.__electrode_pipe_in.append(a)
-            self.__electrode_pipe_out.append(b)
+        (self.__pipe_in, self.__pipe_out) = Pipe()
 
-    def get_electrode_generator(self, n_electrode: int, blocking: bool = False):
-        assert n_electrode < self.N_ELECTRODE
+    def get_data_generator(self, blocking: bool = False):
         def block():
             while True:
-                yield self.__electrode_pipe_out[n_electrode].recv()
+                yield self.__pipe_out.recv()
 
         def nonblock():
             while True:
-                if self.__electrode_pipe_out[n_electrode].poll():
-                    yield self.__electrode_pipe_out[n_electrode].recv()
+                if self.__pipe_out.poll():
+                    yield self.__pipe_out.recv()
                 else:
                     yield None
 
         return block if blocking else nonblock
 
 
-
-    def get_accelerometer_generator(self, blocking: bool = False):
-        def block():
-            while True:
-                yield self.__accelerometer_pipe_out.recv()
-        def nonblock():
-            while True:
-                if self.__accelerometer_pipe_out.poll():
-                    yield self.__accelerometer_pipe_out.recv()
-                else:
-                    yield None
-
-        return block if blocking else nonblock
-
-    # Packet types:
-    # - Electrode     [padding (6 bits)][type (0b00) (2 bits)][timestamp rel (24 bits)][value (24 bits)]* <- Variable lenght depending on num of channels active
-    # - Accelerometer [padding (6 bits)][type (0b01) (2 bits)][timestamp rel (24 bits)][ACC_X (16 bits)][ACC_Y (16 bits)][ACC_Z (16 bits)][GIR_X (16 bits)][GIR_Y (16 bits)][GIR_Z (16 bits)]
-    # - Event         [padding (6 bits)][type (0b10) (2 bits)][timestamp abs (36 bits)][event ID (4 bits)]
-    # - Status        [padding (6 bits)][type (0b11) (2 bits)][electrode status (8 bits)][battery reading (12 bits)]
-    # TODO: Write packet parsers
-    def __parse_electrode(self, packet):
+    # Packet structure:
+    # [absolute timestamp (40 bits)][# of EEG measurements (8 bits)]([relative timestamp (16 bits)][eeg data for each channel (24 bits)]*)*[# of IMU measurements (8 bits)]([relative timestamp (16 bits)][IMU data (96 bits)])*[# of events (8 bits)]([relative timestamp (16 bits)][event ID (8 bits)])*
+    def __parse_packet(self, packet):
         raise RuntimeError("__parse_electrode_packet: Not implemented")
-
-    def __parse_accelerometer(self, packet):
-        raise RuntimeError("__parse_accelerometer_packet: Not implemented")
-
-    def __parse_event(self, packet):
-        raise RuntimeError("__parse_event_packet: Not implemented")
-
-    def __parse_status(self, packet):
-        raise RuntimeError("__parse_status_packet: Not implemented")
 
     def __stream_filler(self):
         while self.__active:
-            packet = self.__udp.recv(8)
-            print(packet, len(packet))
-            match packet[0] & 0b00000011:
-                case 0b00: # Electrode packet
-                    self.__parse_electrode(packet)
-                case 0b01: # Accelerometer packet
-                    self.__parse_accelerometer(packet)
-                case 0b10: # Event packet
-                    self.__parse_event(packet)
-                case 0b11: # Status packet
-                    self.__parse_status(packet)
+            packet = self.__udp.recv(4)
+            self.__pipe_in.send(int.from_bytes(packet, byteorder='little'))
 
     def start(self):
         self.__udp.sendto("start".encode(), self.__remote_address)
@@ -96,87 +53,94 @@ class FreeEEG:
         self.__filler_thread.start()
 
     def stop(self):
-        self.__udp.sendto("stop".encode(), self.__remote_address)
         self.__active = False
+        self.__udp.sendto("stop".encode(), self.__remote_address)
         eeg.__udp.close()
         self.__filler_thread.join()
 
 
 if __name__ == '__main__':
+    import signal
+    from collections import deque
 
-    matplotlib.use("TkAgg")
-    plt.ion()
-    eeg = FreeEEG() # FreeEEG("127.0.0.1", 4321)
+    import matplotlib.pyplot as plt
+    from matplotlib.animation import FuncAnimation
+    BUFFER_SIZE = 1000
+    eeg = FreeEEG()  # FreeEEG("127.0.0.1", 4321)
+
+    data_stream = eeg.get_data_generator(blocking=False)
+    generator = data_stream()
+
+    samples = deque(maxlen=BUFFER_SIZE)
 
     def signal_handler(sig, frame):
-        global f
-        f.close()
         eeg.stop()
+        plt.close('all')
         exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
 
-    # freq = 1000
-    # buffer_size = freq * 2  # 2 seconds
+    fig, ax = plt.subplots(figsize=(10, 5))
+    line, = ax.plot([], [], label='EEG channel')
 
-    # # fixed x axis
-    # x = np.arange(buffer_size)
-    # data = np.zeros(buffer_size)
+    ax.set_title('FreeEEG real-time EEG data')
+    ax.set_xlabel('Samples')
+    ax.set_ylabel('ADC value')
+    ax.grid(True)
+    ax.legend(loc='upper right')
 
-    # fig, ax = plt.subplots()
-    # line, = ax.plot(x, data, color='g')
-    # ax.set_ylim(-20000, 20000)   # fix y limits to avoid rescale cost
-    # ax.set_xlim(0, buffer_size)
+    def update(frame):
+        try:
+            value = next(generator)
+        except StopIteration:
+            return line,
+        except Exception:
+            return line,
 
-    # plt.ion()
-    # plt.show(block=False)
-    # fig.canvas.draw()
-    # background = fig.canvas.copy_from_bbox(ax.bbox)
+        if value < 1e9:
+            return line,
 
-    # # --- fast update function ---
-    # def update_plot(new_val, idx):
-    #     data[idx] = new_val
-    #     line.set_ydata(data)
-    #     fig.canvas.restore_region(background)
-    #     ax.draw_artist(line)
-    #     fig.canvas.blit(ax.bbox)
-    #     fig.canvas.flush_events()
+        samples.append(value)
 
+        x = range(len(samples))
+        line.set_data(x, samples)
 
-    import time
-    last = time.time()
-    
-    # --- simulate incoming samples ---
-    idx = 0
-    data_stream = eeg.get_data_generator(blocking=True)
+        ax.set_xlim(0, BUFFER_SIZE)
 
-    f = open("test.csv", "w+")
+        if samples:
+            ymin = min(samples)
+            ymax = max(samples)
+            margin = 0.1 * (ymax - ymin) if ymax != ymin else 1
+            ax.set_ylim(ymin - margin, ymax + margin)
+
+        return line,
+
     eeg.start()
     print("Starting EEG...")
-    f.write("timestamp,e1,e2,e3,e4,e5,e6,e7,e8,ax,ay,az,gx,gy,gz,event\n")
-    for i in data_stream():
-        f.write(i.as_csv() + "\n")
 
-        
-        # if len(data) < freq*2:
-        #     data.append(i)
-        # else:
-        #     data.pop(0)
-        #     data.append(i)
+    animation = FuncAnimation(fig, update, interval=20, blit=False)
+    plt.show()
 
-        # # update line data
-        # line.set_ydata(data)
-        # line.set_xdata(range(len(data)))
+    eeg.stop()
 
-        # # rescale axes if needed
-        # ax.relim()
-        # ax.autoscale_view()
+# if __name__ == '__main__':
+#     eeg = FreeEEG() # FreeEEG("127.0.0.1", 4321)
 
-        # # restore background, draw only the line, then blit
-        # fig.canvas.restore_region(background) # type: ignore
-        # ax.draw_artist(line)
-        # fig.canvas.blit(ax.bbox)
-        # fig.canvas.flush_events()
+#     def signal_handler(sig, frame):
+#         # global f
+#         # f.close()
+#         eeg.stop()
+#         exit(0)
 
-        # update_plot(i, idx)
-        # idx = (idx + 1) % buffer_size
+#     signal.signal(signal.SIGINT, signal_handler)
+    
+#     data_stream = eeg.get_data_generator(blocking=True)
+
+#     # f = open("test.csv", "w+")
+#     eeg.start()
+#     print("Starting EEG...")
+#     # f.write("timestamp,e1,e2,e3,e4,e5,e6,e7,e8,ax,ay,az,gx,gy,gz,event\n")
+#     for i in data_stream():
+#         # f.write(i.as_csv() + "\n")
+
+#         print(i)
