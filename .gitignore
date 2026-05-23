@@ -22,7 +22,7 @@ fp-info-cache
 ~*.lck
 \#auto_saved_files#
 
-Firmware/ESP32/build
+Firmware/build
 
 # Netlist files (exported from Eeschema)
 *.net
