@@ -22,10 +22,11 @@ static esp_err_t http_root_handler(httpd_req_t *req) {
   return httpd_resp_send(req, (const char *) net_index_html, net_index_html_len);
 }
 
-/* static esp_err_t http_status_handler(httpd_req_t *req) { */
-/*   char content[] = ""; */
-/*   return httpd_resp_send(req,  */
-/* } */
+static esp_err_t http_status_handler(httpd_req_t *req) {
+  httpd_resp_set_type(req, "text/html");
+  char content[] = "";
+  return httpd_resp_send(req, (const char*) content, strlen());
+}
 
 static esp_err_t http_update_handler(httpd_req_t *req) {
     char content[128];

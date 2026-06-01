@@ -15,7 +15,7 @@
 static int udp_sock = -1;
 static struct sockaddr_in udp_dest_addr;
 
-static void wifi_udp_send_packet(const uint8_t* data, uint8_t data_len) {
+static void wifi_udp_send(const uint8_t* data, uint16_t data_len) {
     if (udp_sock < 0 || data == NULL || data_len == 0) {
         return;
     }
@@ -80,14 +80,12 @@ void wifi_udp_stop(void) {
     }
 }
 
-/* void wifi_udp_send_data(const udp_packet_t* data) { */
-/*   uint8_t buff[sizeof(udp_packet_t)]; */
-
-  
-/* } */
+void wifi_udp_send_packet(const udp_packet_t* data) {
+  wifi_udp_send((const uint8_t*) data, sizeof(udp_packet_t));
+}
 
 void wifi_udp_send_data(const uint32_t* data) {
-  wifi_udp_send_packet((const uint8_t*) data, sizeof(uint32_t));
+  wifi_udp_send((const uint8_t*) data, sizeof(uint32_t));
 }
 
 bool wifi_udp_recv_packet(uint8_t *buffer) {

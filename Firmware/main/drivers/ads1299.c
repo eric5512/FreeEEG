@@ -12,7 +12,7 @@
 static const char* TAG = "ADS1299";
 
 #define ADS1299_SPI_HOST SPI2_HOST
-#define ADS1299_SPI_FREQ_HZ 1000000
+#define ADS1299_SPI_FREQ_HZ 500000
 
 #define ADS1299_CMD_WAKEUP  0x02
 #define ADS1299_CMD_STANDBY 0x04
@@ -38,6 +38,8 @@ static const char* TAG = "ADS1299";
 
 static gpio_num_t ads1299_drdy_pin = GPIO_NUM_NC;
 static void (*ads1299_drdy_callback)(void) = NULL;
+
+static gpio_num_t ads1299_start_pin = GPIO_NUM_NC;
 
 static spi_device_handle_t ads_spi = NULL;
 static volatile bool ads_running = false;
@@ -107,10 +109,19 @@ void ads1299_init(uint8_t pin_mosi,
     uint8_t pin_sck,
     uint8_t pin_cs,
     uint8_t pin_drdy,
+    uint8_t pin_start,
     void (*drdy_callback)(void)) {
     ads1299_drdy_pin = (gpio_num_t)pin_drdy;
     ads1299_drdy_callback = drdy_callback;
 
+    gpio_config_t config_start = {0};
+    config_start.mode = GPIO_MODE_OUTPUT;
+    config_start.pin_bit_mask = 1ULL << pin_start;
+    gpio_config(&config_start);
+
+    ads1299_start_pin = (gpio_num_t)pin_start;
+    gpio_set_level(ads1299_start_pin, 1);
+    
     spi_bus_config_t buscfg = {
         .mosi_io_num = pin_mosi,
         .miso_io_num = pin_miso,
@@ -205,20 +216,14 @@ void ads1299_send_config(const config_t* conf) {
   uint8_t dr = ads1299_sample_rate_bits(conf->sample_rate);
 
   // CONFIG1:
-  // 0x90 keeps high-resolution mode and internal clock-related defaults.
-  // Lower 3 bits select data rate.
-  ads1299_write_reg(ADS1299_REG_CONFIG1, 0xD8 | dr);
+  ads1299_write_reg(ADS1299_REG_CONFIG1, 0x90 | dr);
 
   // CONFIG2:
-  // Internal test signal disabled, normal operation.
-  ads1299_write_reg(ADS1299_REG_CONFIG2, 0xC0);
+  ads1299_write_reg(ADS1299_REG_CONFIG2, 0xD0);
 
   // CONFIG3:
-  // Enable internal reference buffer and bias amplifier.
-  ads1299_write_reg(ADS1299_REG_CONFIG3, 0xEC);
+  ads1299_write_reg(ADS1299_REG_CONFIG3, 0xE0);
 
-  // CONFIG4:
-  // 
 
   for (int i = 0; i < NUM_ELECTRODES; i++) {
     uint8_t ch_reg = ADS1299_REG_CH1SET + i;
@@ -226,41 +231,31 @@ void ads1299_send_config(const config_t* conf) {
     if (conf->electrodes[i]) {
       // Enabled channel:
       // gain = 24, normal electrode input.
-      ads1299_write_reg(ch_reg, 0x60);
+      /* ads1299_write_reg(ch_reg, 0x60); */
+      ads1299_write_reg(ch_reg, 0x05); // Use test signal
     } else {
       // Disabled channel:
       // power down channel, input shorted.
-      ads1299_write_reg(ch_reg, 0x81);
+      ads1299_write_reg(ch_reg, 0xE1);
     }
   }
 
-  if (conf->comm_ref) {
-    uint8_t bias_mask = 0x00;
+  // Enable/Disable SRB1 common reference routing.
+  ads1299_write_reg(ADS1299_REG_MISC1, conf->comm_ref ? 0x20 : 0x00);
 
-    for (int i = 0; i < NUM_ELECTRODES; i++) {
-      if (conf->electrodes[i]) {
-	bias_mask |= (1 << i);
-      }
-    }
-
-    // Include active channels in bias/common-reference generation.
-    ads1299_write_reg(ADS1299_REG_BIAS_SENSP, bias_mask);
-    ads1299_write_reg(ADS1299_REG_BIAS_SENSN, bias_mask);
-
-    // Enable SRB1 common reference routing.
-    ads1299_write_reg(ADS1299_REG_MISC1, 0x20);
-  } else {
-    ads1299_write_reg(ADS1299_REG_BIAS_SENSP, 0x00);
-    ads1299_write_reg(ADS1299_REG_BIAS_SENSN, 0x00);
-    ads1299_write_reg(ADS1299_REG_MISC1, 0x00);
-  }
+  ESP_LOGI(TAG, "CONFIG1 = 0x%02X", ads1299_read_register(ADS1299_REG_CONFIG1));
+  ESP_LOGI(TAG, "CONFIG2 = 0x%02X", ads1299_read_register(ADS1299_REG_CONFIG2));
+  ESP_LOGI(TAG, "CONFIG3 = 0x%02X", ads1299_read_register(ADS1299_REG_CONFIG3));
+  /* ESP_LOGI(TAG, "CH1SET  = 0x%02X", ads1299_read_register(ADS1299_REG_CH1SET)); */
+  ESP_LOGI(TAG, "MISC1   = 0x%02X", ads1299_read_register(ADS1299_REG_MISC1));  
 }
 
 void ads1299_start(void) {
   ads1299_cmd(ADS1299_CMD_SDATAC);
   ads1299_cmd(ADS1299_CMD_START);
+  /* gpio_set_level(ads1299_start_pin, 1); */
   ads1299_cmd(ADS1299_CMD_RDATAC);
-
+  
   ads_running = true;
 }
 
@@ -268,6 +263,7 @@ void ads1299_stop(void) {
   ads_running = false;
 
   ads1299_cmd(ADS1299_CMD_SDATAC);
+  /* gpio_set_level(ads1299_start_pin, 0); */
   ads1299_cmd(ADS1299_CMD_STOP);
 }
 
@@ -295,18 +291,18 @@ void ads1299_read(ads1299_data_t *data) {
   for (uint8_t i = 0; i < 8; i++) {
     uint32_t idx = 3 + (i * 3);
 
-    int32_t value =
-      ((int32_t)raw[idx] << 16) |
-      ((int32_t)raw[idx + 1] << 8)  |
-      ((int32_t)raw[idx + 2]);
+    uint32_t value =
+      ((uint32_t)raw[idx] << 16) |
+      ((uint32_t)raw[idx + 1] << 8)  |
+      ((uint32_t)raw[idx + 2]);
 
-    /*
-     * Sign extension:
-     * 24-bit -> 32-bit
-     */
-    if (value & 0x00800000) {
-      value |= 0xFF000000;
-    }
+    /* /\* */
+    /*  * Sign extension: */
+    /*  * 24-bit -> 32-bit */
+    /*  *\/ */
+    /* if (value & 0x00800000) { */
+    /*   value |= 0xFF000000; */
+    /* } */
 
     data->channel[i] = value;
   }
