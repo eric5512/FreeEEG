@@ -17,7 +17,7 @@ void app_main(void) {
 
   tasks_init();
   
-  xTaskCreatePinnedToCore(task_afe,"task_afe", 10000, NULL, 0, &task_afe_handle, 1);
+  xTaskCreatePinnedToCore(task_afe,"task_afe", 10000, NULL, 20, &task_afe_handle, 1);
   /* xTaskCreatePinnedToCore(task_imu,"task_imu", 10000, NULL, 0, &task_imu_handle, 1); */
   xTaskCreatePinnedToCore(task_write,"task_write", 10000, NULL, 0, &task_write_handle, 0);
   /* xTaskCreatePinnedToCore(task_config,"task_config", 10000, NULL, 0, &task_config_handle, 0); */

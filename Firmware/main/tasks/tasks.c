@@ -46,7 +46,7 @@
 #define EVENT_BIT_ONLINE_MEAS	(1<<2)
 #define EVENT_BIT_IDLE		(1<<3)
 #define EVENT_BIT_IMU_AVAIL	(1<<4)
-#define EVENT_BIT_AFE_AVAIL	(1<<5)
+/* #define EVENT_BIT_AFE_AVAIL	(1<<5) */
 
 
 static EventGroupHandle_t event_group;
@@ -66,40 +66,33 @@ static void IRAM_ATTR imu_isr() {
   }
 }
 
-static void IRAM_ATTR afe_isr() {
-  gettimeofday(&time_afe, NULL);
-  
-  BaseType_t higher_priority_task_woken = pdFALSE;
-  xEventGroupSetBitsFromISR(event_group, EVENT_BIT_AFE_AVAIL, &higher_priority_task_woken);
-  
-  if (higher_priority_task_woken) {
-      portYIELD_FROM_ISR();
-  }
-}
-
 /* static void IRAM_ATTR afe_isr() { */
 /*   gettimeofday(&time_afe, NULL); */
-
-/*   ads1299_data_t data; */
-/*   data.timestamp = time_afe; */
-/*   ads1299_read(&data); */
-
-/*   BaseType_t higher_priority_task_woken = pdFALSE; */
   
-/*   if (data.status[0] == 0xC0 && data.status[1] == 0x00 && data.status[2] == 0x00) { */
-/*     xRingbufferSendFromISR(buff_afe, */
-/* 			   &data, */
-/* 			   sizeof(ads1299_data_t), */
-/* 			   &higher_priority_task_woken); */
-/*   } */
-
-
+/*   BaseType_t higher_priority_task_woken = pdFALSE; */
+/*   xEventGroupSetBitsFromISR(event_group, EVENT_BIT_AFE_AVAIL, &higher_priority_task_woken); */
+  
 /*   if (higher_priority_task_woken) { */
 /*       portYIELD_FROM_ISR(); */
 /*   } */
-
 /* } */
 
+static TaskHandle_t afe_task_handle = NULL;
+static volatile uint32_t drdy_isr_count = 0;
+static void IRAM_ATTR afe_isr(void) {
+    BaseType_t hp_task_woken = pdFALSE;
+
+    drdy_isr_count++;
+
+    if (afe_task_handle != NULL) {
+      gettimeofday(&time_afe, NULL);
+      vTaskNotifyGiveFromISR(afe_task_handle, &hp_task_woken);
+    }
+
+    if (hp_task_woken) {
+        portYIELD_FROM_ISR();
+    }
+}
 
 static int level;
 
@@ -156,35 +149,33 @@ void tasks_init() {
 }
 
 void task_afe(void *args) {
-  config_t config = {
-    .sample_rate = 250,
-    .filt_freq = 50,
-    .electrodes = {0},
-    .comm_ref = false
-  };
+    afe_task_handle = xTaskGetCurrentTaskHandle();
 
-  config.electrodes[0] = true;
-  
-  ads1299_init(ADS1299_PIN_MOSI, ADS1299_PIN_MISO, ADS1299_PIN_SCK, ADS1299_PIN_CS, ADS1299_PIN_DRDY, ADS1299_PIN_START, afe_isr);
-  ads1299_send_config(&config);
+    ads1299_data_t data;
+    config_t config = {
+      .sample_rate = 250,
+      .filt_freq = 50,
+      .electrodes = {0},
+      .comm_ref = false
+    };
 
-  ads1299_data_t data;
-  ads1299_start();
-  while(1) {
-    xEventGroupWaitBits(event_group, EVENT_BIT_ONLINE_MEAS | EVENT_BIT_OFFLINE_MEAS, pdFALSE, pdFALSE, portMAX_DELAY);
-    xEventGroupWaitBits(event_group, EVENT_BIT_AFE_AVAIL, pdTRUE, pdFALSE, portMAX_DELAY);
-    data.timestamp = time_afe;
-    ads1299_read(&data);
+    config.electrodes[0] = true;
+    config.electrodes[1] = true;
+    
+    ads1299_init(ADS1299_PIN_MOSI, ADS1299_PIN_MISO, ADS1299_PIN_SCK, ADS1299_PIN_CS, ADS1299_PIN_DRDY, ADS1299_PIN_START, afe_isr);
+    ads1299_send_config(&config);
 
-    if (data.status[0] != 0xC0 || data.status[1] != 0x00 || data.status[2] != 0x00) {
-      ESP_LOGW(TAG, "Unexpected STATUS: %02X %02X %02X", data.status[0], data.status[1], data.status[2]);
-    } else {
-      xRingbufferSend(buff_afe,
-		      &data,
-		      sizeof(ads1299_data_t),
-		      portMAX_DELAY);
+    
+    ads1299_start();
+
+    while (1) {
+        ulTaskNotifyTake(pdFALSE, portMAX_DELAY);
+
+        ads1299_read(&data);
+	data.timestamp = time_afe;
+
+        xRingbufferSend(buff_afe, &data, sizeof(data), 0);
     }
-  }
 }
 
 void task_imu(void *args) {
@@ -212,20 +203,27 @@ void task_write(void *args) {
       
       count = 0;
       ads1299_data_t* data = NULL;
-      while (count < UDP_ELEC_BUFF_SIZE) {
-	data = (ads1299_data_t *) xRingbufferReceive(buff_afe, &size, 0);
-	if (data == NULL) break;
+      data = (ads1299_data_t *) xRingbufferReceive(buff_afe, &size, 0);
+      if (data != NULL) {
+	packet.abs_time = data->timestamp.tv_sec;
 	memcpy(&packet.elec_data[count], data->channel, sizeof(data->channel));
 	packet.elec_time[count++] = data->timestamp.tv_usec;
-	packet.abs_time = data->timestamp.tv_sec;
 	vRingbufferReturnItem(buff_afe, data);
+	while (count < UDP_ELEC_BUFF_SIZE) {
+	  data = (ads1299_data_t *) xRingbufferReceive(buff_afe, &size, 0);
+	  if (data == NULL) break;
+	  memcpy(&packet.elec_data[count], data->channel, sizeof(data->channel));
+	  packet.elec_time[count] = data->timestamp.tv_usec;
+	  if (data->timestamp.tv_sec > packet.abs_time)
+	      packet.elec_time[count] += 1000000;
+	  vRingbufferReturnItem(buff_afe, data);
+	  count++;
+	}
       }
       packet.num_elec = count;
 
-      
-      
       wifi_udp_send_packet(&packet);
-      vTaskDelay(pdMS_TO_TICKS(25));
+      vTaskDelay(pdMS_TO_TICKS(30));
     }
   }
 }

@@ -16,21 +16,21 @@ class FreeEEG:
     N_ELECTRODE = 8
 
     def __init__(self, remote_ip = "192.168.4.1", remote_port = 69, local_ip = "", local_port = 6969) -> None:    
-        self.__ELEC_BUFF_SIZE =  20
-        self.__IMU_BUFF_SIZE =   10
+        self.__ELEC_BUFF_SIZE =  30
+        self.__IMU_BUFF_SIZE =   5
         self.__EVENT_BUFF_SIZE = 2
         self.__STRUCT_FMT = (
             "<"
             "I"      # abs_timestamp
             "B"      # num_elec
-            f"{self.__ELEC_BUFF_SIZE}H"
+            f"{self.__ELEC_BUFF_SIZE}I"
             f"{self.__ELEC_BUFF_SIZE * 8}I"
             "B"      # num_imu
-            f"{self.__IMU_BUFF_SIZE}H"
+            f"{self.__IMU_BUFF_SIZE}I"
             f"{self.__IMU_BUFF_SIZE * 3}H"
             f"{self.__IMU_BUFF_SIZE * 3}H"
             "B"      # num_events
-            f"{self.__EVENT_BUFF_SIZE}H"
+            f"{self.__EVENT_BUFF_SIZE}I"
             f"{self.__EVENT_BUFF_SIZE}B"
         )
 
@@ -122,9 +122,6 @@ class FreeEEG:
 
         return block if blocking else nonblock
 
-
-    # Packet structure:
-    # [absolute timestamp (40 bits)][# of EEG measurements (8 bits)]([relative timestamp (16 bits)][eeg data for each channel (24 bits)]*)*[# of IMU measurements (8 bits)]([relative timestamp (16 bits)][IMU data (96 bits)])*[# of events (8 bits)]([relative timestamp (16 bits)][event ID (8 bits)])*
     def __stream_filler(self):
         while self.__active:
             packet = self.__udp.recv(self.__STRUCT_SIZE)
@@ -145,117 +142,133 @@ class FreeEEG:
     def adc_to_volts(value):
         return (value if value >= 0x800000 else value - 0xFFFFFF) * FreeEEG.FSR / 0xFFFFFF
 
-# if __name__ == '__main__':
-#     import signal
-#     from collections import deque
-
-#     import matplotlib.pyplot as plt
-#     from matplotlib.animation import FuncAnimation
-
-#     BUFFER_SIZE = 500
-
-#     eeg = FreeEEG()  # FreeEEG("127.0.0.1", 4321)
-
-#     data_stream = eeg.get_data_generator(blocking=False)
-#     generator = data_stream()
-
-#     timestamps = deque(maxlen=BUFFER_SIZE)
-#     samples = deque(maxlen=BUFFER_SIZE)
-
-#     t0 = None
-
-#     def signal_handler(sig, frame):
-#         eeg.stop()
-#         plt.close('all')
-#         exit(0)
-
-#     signal.signal(signal.SIGINT, signal_handler)
-
-#     fig, ax = plt.subplots(figsize=(10, 5))
-#     line, = ax.plot([], [], label='EEG channel 1')
-
-#     ax.set_title('FreeEEG real-time EEG data')
-#     ax.set_xlabel('Time (s)')
-#     ax.set_ylabel('Voltage (V)')
-#     ax.grid(True)
-#     ax.legend(loc='upper right')
-
-#     def update(frame):
-#         global t0
-
-#         try:
-#             packet = next(generator)
-#         except StopIteration:
-#             return line,
-#         except Exception:
-#             return line,
-
-#         if packet is not None:
-#             for sample_idx in range(len(packet.elec_data)):
-#                 value = packet.elec_data[sample_idx][0]
-#                 volts = FreeEEG.adc_to_volts(value)
-
-#                 timestamp = packet.abs_time + packet.elec_time[sample_idx]
-
-#                 if t0 is None:
-#                     t0 = timestamp
-
-#                 time_s = (timestamp - t0) / 1000.0
-
-#                 timestamps.append(time_s)
-#                 samples.append(volts)
-
-#             line.set_data(timestamps, samples)
-
-#             if timestamps:
-#                 ax.set_xlim(timestamps[0], timestamps[-1] if timestamps[-1] > timestamps[0] else timestamps[0] + 1)
-
-#             if samples:
-#                 ymin = min(samples)
-#                 ymax = max(samples)
-#                 margin = 0.1 * (ymax - ymin) if ymax != ymin else 1
-#                 ax.set_ylim(ymin - margin, ymax + margin)
-
-#         return line,
-
-#     eeg.start()
-#     print("Starting EEG...")
-
-#     animation = FuncAnimation(fig, update, interval=20, blit=False)
-#     plt.show()
-
-#     eeg.stop()
-
 if __name__ == '__main__':
     import signal
-    import numpy as np
-    eeg = FreeEEG() # FreeEEG("127.0.0.1", 4321)
+    from collections import deque
+
+    import matplotlib.pyplot as plt
+    from matplotlib.animation import FuncAnimation
+
+
+    BUFFER_SIZE = 1000
+    CHANNELS_TO_PLOT = [0]  # Add more channels later, e.g. [0, 1, 2, 3]
+    
+    eeg = FreeEEG()
+
+    data_stream = eeg.get_data_generator(blocking=False)
+    generator = data_stream()
+
+    time_data = deque(maxlen=BUFFER_SIZE)
+    channel_data = {
+        ch: deque(maxlen=BUFFER_SIZE)
+        for ch in CHANNELS_TO_PLOT
+    }
+
+    t0 = None
 
     def signal_handler(sig, frame):
-        # global f
-        # f.close()
-        global latencies
-        latencies = np.array(sorted(latencies))
-        diffs = 1000*(latencies[1:] - latencies[:-1])
-        diffs = diffs[1:]
-        print(diffs)
-        print(f"stdev: {np.std(diffs)}, min {min(diffs)}, max: {max(diffs)}, mean: {diffs.mean()}")
         eeg.stop()
+        plt.close('all')
         exit(0)
 
     signal.signal(signal.SIGINT, signal_handler)
-    
-    data_stream = eeg.get_data_generator(blocking=True)
 
-    # f = open("test.csv", "w+")
+    fig, ax = plt.subplots(figsize=(10, 5))
+
+    lines = {}
+    for ch in CHANNELS_TO_PLOT:
+        line, = ax.plot([], [], label=f'EEG channel {ch + 1}')
+        lines[ch] = line
+
+    ax.set_title('FreeEEG real-time EEG data')
+    ax.set_xlabel('Time (s)')
+    ax.set_ylabel('Voltage (V)')
+    ax.grid(True)
+    ax.legend(loc='upper right')
+
+    def update(frame):
+        global t0
+
+        packet = next(generator)
+
+        if packet is None:
+            return tuple(lines.values())
+
+        for sample_idx, rel_timestamp in enumerate(packet.elec_time):
+            timestamp = packet.abs_time + rel_timestamp / 1e6
+
+            if t0 is None:
+                t0 = timestamp
+
+            time_s = (timestamp - t0)
+            time_data.append(time_s)
+
+            for ch in CHANNELS_TO_PLOT:
+                adc_value = packet.elec_data[sample_idx][ch]
+                volts = FreeEEG.adc_to_volts(adc_value)
+                channel_data[ch].append(volts)
+
+        for ch in CHANNELS_TO_PLOT:
+            lines[ch].set_data(time_data, channel_data[ch])
+
+        if len(time_data) >= 2:
+            ax.set_xlim(time_data[0], time_data[-1])
+
+        all_values = [
+            value
+            for ch in CHANNELS_TO_PLOT
+            for value in channel_data[ch]
+        ]
+
+        if all_values:
+            ymin = min(all_values)
+            ymax = max(all_values)
+            margin = 0.1 * (ymax - ymin) if ymax != ymin else 1e-6
+            ax.set_ylim(ymin - margin, ymax + margin)
+
+        return tuple(lines.values())
+
     eeg.start()
     print("Starting EEG...")
-    # f.write("timestamp,e1,e2,e3,e4,e5,e6,e7,e8,ax,ay,az,gx,gy,gz,event\n")
-    latencies = []
-    last = None
-    for i in data_stream():
-        # f.write(i.as_csv() + "\n")
-        print(i)
-        if len(i.elec_time) > 0:
-            time = i.elec_time[0] / 1e6 + i.abs_time
-            latencies.append(time)
+
+    animation = FuncAnimation(fig, update, interval=20, blit=False)
+    plt.show()
+
+    eeg.stop()
+
+# if __name__ == '__main__':
+#     import time
+#     import signal
+#     import numpy as np
+#     eeg = FreeEEG() # FreeEEG("127.0.0.1", 4321)
+
+#     def signal_handler(sig, frame):
+#         # global f
+#         # f.close()
+#         global latencies
+#         latencies = np.array(sorted(latencies))
+#         diffs = (1000*(latencies[1:] - latencies[:-1])).astype(int)
+#         with open("data.txt", "w+") as f:
+#             f.write("\n".join([f"{i},{j}" for i, j in zip(diffs, latencies[1:])]))
+#         time_diff = time.time() - beg
+#         print(f"Throughput: {count} packets in {time_diff} seconds; {count/time_diff} packets/s")
+#         eeg.stop()
+#         exit(0)
+
+#     signal.signal(signal.SIGINT, signal_handler)
+    
+#     data_stream = eeg.get_data_generator(blocking=True)
+
+#     # f = open("test.csv", "w+")
+#     eeg.start()
+#     print("Starting EEG...")
+#     # f.write("timestamp,e1,e2,e3,e4,e5,e6,e7,e8,ax,ay,az,gx,gy,gz,event\n")
+#     latencies = []
+#     beg = time.time()
+#     count = 0
+#     for i in data_stream():
+#         # f.write(i.as_csv() + "\n")
+#         for j in i.elec_time:
+#             count += 1 
+#             time_ = j / 1e6 + i.abs_time
+#             latencies.append(time_)
