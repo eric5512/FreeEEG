@@ -58,6 +58,8 @@ Main hardware components:
 
 The PCB prototype is a two-layer board of approximately 55 mm × 90 mm. The design separates sensitive analog circuitry from noisy digital and switching sections, places the ADS1299 close to the electrode connector, and includes RC low-pass input filtering for each EEG channel.
 
+> **Warning:** The PCB still presents some issues in its current form. More modifications need to be introduced to release the first fully functional version
+
 ## Firmware
 
 The firmware is developed using **ESP-IDF** and **FreeRTOS**. It is organized into concurrent tasks to separate time-critical acquisition from communication, storage, and configuration logic.
@@ -233,3 +235,10 @@ This project is provided for educational, research, and experimental use only. I
 
 The authors and contributors are not responsible for misuse of the hardware, firmware, or software.
 
+## TODO list:
+- [ ] Solve the PCB issues.
+- [ ] Implement SD card drivers.
+- [ ] Implement offline acquisition mode.
+- [ ] Add more functionality to the client, like ".as_csv()" method to save data.
+- [ ] Add biofeedback example scripts.
+- [ ] Clean repo.

@@ -1,0 +1,8 @@
+- Add vias for ground plane
+- Change LED for neopixel
+- Try 4 layer PCB
+- Change button footprint to the correct one
+- Add header for ext trigger
+- Add Pull-up I2C
+- Add debouncing to the switch
+- Change 9V for rechargable battery
