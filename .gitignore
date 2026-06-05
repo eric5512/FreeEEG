@@ -11,6 +11,7 @@
 *-cache*
 *-bak
 *-bak*
+*.csv
 *~
 ~*
 _autosave-*

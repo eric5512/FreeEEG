@@ -50,7 +50,7 @@ class FreeEEG:
     @dataclass
     class Packet:
         abs_time: int
-        elec_data: list[tuple[int, int]]
+        elec_data: list[tuple[int, list[int]]]
         imu_data: list[tuple[int, tuple[int,int,int], tuple[int,int,int]]]
         event_data: list[tuple[int, int]]
 

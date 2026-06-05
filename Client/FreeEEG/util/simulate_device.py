@@ -1,15 +1,6 @@
 import socket
 import time
 
-# TODO: Implement BitView
-class BitView:
-    def __init__(data: list[int]):
-        pass
-
-# TODO: Implement BitBuilder
-class BitBuilder:
-    def __init__(data: list[int]):
-        pass
     
 # Electrode : [type (0b00) (2 bits)][timestamp rel (24 bits)][value (24 bits)]* <- Variable lenght depending on num of channels active
 def electrode_packet(timestamp: int, data: list[int]) -> list[bytes]:

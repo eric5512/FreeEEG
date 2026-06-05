@@ -16,7 +16,5 @@ if __name__ == '__main__':
 
     eeg.start()
     print("Starting EEG...")
-    beg = time.time()
-    count = 0
     for i in data_stream():
         print(i)

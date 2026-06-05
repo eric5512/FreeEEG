@@ -9,8 +9,21 @@ if __name__ == '__main__':
 
     import datetime
 
+    import argparse
+
+    from sys import argv
+    
+    parser = argparse.ArgumentParser(
+                    prog='PlotElectrodes',
+                    description='Plot and save the signal from selected electrodes')
+
+    parser.add_argument('-s', '--save', action='store_true')
+    parser.add_argument('-e', '--elec', type=int, choices=list(range(FreeEEG.N_ELECTRODE)), action='append', required=True)
+
+    args = parser.parse_args(argv[1:])
+    
     BUFFER_SIZE = 1000
-    CHANNELS_TO_PLOT = [0]  # Add more channels later, e.g. [0, 1, 2, 3]
+    CHANNELS_TO_PLOT = args.elec
     
     eeg = FreeEEG()
 
@@ -27,7 +40,8 @@ if __name__ == '__main__':
 
     def signal_handler(sig, frame):
         eeg.stop()
-        csv.close()
+        if args.save:
+            csv.close()
         plt.close('all')
 
     signal.signal(signal.SIGINT, signal_handler)
@@ -36,7 +50,7 @@ if __name__ == '__main__':
 
     lines = {}
     for ch in CHANNELS_TO_PLOT:
-        line, = ax.plot([], [], label=f'EEG channel {ch + 1}')
+        line, = ax.plot([], [], label=f'EEG channel {ch}')
         lines[ch] = line
 
     ax.set_title('FreeEEG real-time EEG data')
@@ -45,9 +59,11 @@ if __name__ == '__main__':
     ax.grid(True)
     ax.legend(loc='upper right')
 
-    start = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    csv = open(f"recording_{start}.csv", "w+")
-    
+    if args.save:
+        start = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        csv = open(f"recording_{start}.csv", "w+")
+        csv.write(f"time,e0,e1,e2,e3,e4,e5,e6,e7\n")
+        
     def update(frame):
         global t0, csv
 
@@ -56,7 +72,8 @@ if __name__ == '__main__':
         if packet is None:
             return tuple(lines.values())
 
-        csv.write(packet.as_csv())
+        if args.save:
+            csv.write(packet.as_csv())
         
         for rel_timestamp, data in packet.elec_data:
             timestamp = packet.abs_time + rel_timestamp / 1e6

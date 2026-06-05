@@ -231,8 +231,8 @@ void ads1299_send_config(const config_t* conf) {
     if (conf->electrodes[i]) {
       // Enabled channel:
       // gain = 24, normal electrode input.
-      /* ads1299_write_reg(ch_reg, 0x60); */
-      ads1299_write_reg(ch_reg, 0x05); // Use test signal
+      ads1299_write_reg(ch_reg, 0x60);
+      /* ads1299_write_reg(ch_reg, 0x05); // Use test signal */
     } else {
       // Disabled channel:
       // power down channel, input shorted.
