@@ -42,8 +42,20 @@ static void (*ads1299_drdy_callback)(void) = NULL;
 static gpio_num_t ads1299_start_pin = GPIO_NUM_NC;
 
 static spi_device_handle_t ads_spi = NULL;
-static volatile bool ads_running = false;
-static uint16_t ads_sample_rate = 250;
+
+static SemaphoreHandle_t ads1299_spi_mutex = NULL;
+
+static void ads1299_spi_lock(void) {
+  if (ads1299_spi_mutex != NULL) {
+    xSemaphoreTake(ads1299_spi_mutex, portMAX_DELAY);
+  }
+}
+
+static void ads1299_spi_unlock(void) {
+  if (ads1299_spi_mutex != NULL) {
+    xSemaphoreGive(ads1299_spi_mutex);
+  }
+}
 
 static void ads1299_spi_txrx(const uint8_t *tx, uint8_t *rx, size_t len) {
   spi_transaction_t t = {
@@ -52,7 +64,9 @@ static void ads1299_spi_txrx(const uint8_t *tx, uint8_t *rx, size_t len) {
     .rx_buffer = rx
   };
 
+  ads1299_spi_lock();
   ESP_ERROR_CHECK(spi_device_transmit(ads_spi, &t));
+  ads1299_spi_unlock();
 }
 
 static void ads1299_cmd(uint8_t cmd) {
@@ -87,19 +101,6 @@ static uint8_t ads1299_read_register(uint8_t reg) {
   return rx[2];
 }
 
-static uint8_t ads1299_sample_rate_bits(uint16_t sample_rate) {
-  switch (sample_rate) {
-  case 16000: return 0x00;
-  case 8000:  return 0x01;
-  case 4000:  return 0x02;
-  case 2000:  return 0x03;
-  case 1000:  return 0x04;
-  case 500:   return 0x05;
-  case 250:   return 0x06;
-  default:    return 0x06;   // Default: 250 SPS
-  }
-}
-
 static void IRAM_ATTR ads1299_drdy_isr_handler(void *arg) {
   ads1299_drdy_callback();
 }
@@ -121,6 +122,9 @@ void ads1299_init(uint8_t pin_mosi,
 
     ads1299_start_pin = (gpio_num_t)pin_start;
     gpio_set_level(ads1299_start_pin, 1);
+
+    ads1299_spi_mutex = xSemaphoreCreateMutex();
+    ESP_ERROR_CHECK(ads1299_spi_mutex == NULL ? ESP_ERR_NO_MEM : ESP_OK);
     
     spi_bus_config_t buscfg = {
         .mosi_io_num = pin_mosi,
@@ -204,19 +208,15 @@ void ads1299_init(uint8_t pin_mosi,
     }
 }
 
-void ads1299_send_config(const config_t* conf) {
+void ads1299_send_config(const ads1299_config_t* conf) {
   if (conf == NULL) {
     return;
   }
-
-  ads_sample_rate = conf->sample_rate;
-
+  
   ads1299_cmd(ADS1299_CMD_SDATAC);
 
-  uint8_t dr = ads1299_sample_rate_bits(conf->sample_rate);
-
   // CONFIG1:
-  ads1299_write_reg(ADS1299_REG_CONFIG1, 0x90 | dr);
+  ads1299_write_reg(ADS1299_REG_CONFIG1, 0x90 | conf->sample_rate);
 
   // CONFIG2:
   ads1299_write_reg(ADS1299_REG_CONFIG2, 0xD0);
@@ -224,19 +224,16 @@ void ads1299_send_config(const config_t* conf) {
   // CONFIG3:
   ads1299_write_reg(ADS1299_REG_CONFIG3, 0xE0);
 
-
   for (int i = 0; i < NUM_ELECTRODES; i++) {
     uint8_t ch_reg = ADS1299_REG_CH1SET + i;
 
-    if (conf->electrodes[i]) {
+    if (conf->electrodes[i] != ADS1299_CONFIG_CHANNELMODE_PWRDWN) {
       // Enabled channel:
-      // gain = 24, normal electrode input.
-      ads1299_write_reg(ch_reg, 0x60);
-      /* ads1299_write_reg(ch_reg, 0x05); // Use test signal */
+      uint8_t ch_val = (conf->gains[i] << 4) | conf->electrodes[i];
+      ads1299_write_reg(ch_reg, ch_val);
     } else {
       // Disabled channel:
-      // power down channel, input shorted.
-      ads1299_write_reg(ch_reg, 0xE1);
+      ads1299_write_reg(ch_reg, 0xE1); // power down channel, input shorted.
     }
   }
 
@@ -246,7 +243,6 @@ void ads1299_send_config(const config_t* conf) {
   ESP_LOGI(TAG, "CONFIG1 = 0x%02X", ads1299_read_register(ADS1299_REG_CONFIG1));
   ESP_LOGI(TAG, "CONFIG2 = 0x%02X", ads1299_read_register(ADS1299_REG_CONFIG2));
   ESP_LOGI(TAG, "CONFIG3 = 0x%02X", ads1299_read_register(ADS1299_REG_CONFIG3));
-  /* ESP_LOGI(TAG, "CH1SET  = 0x%02X", ads1299_read_register(ADS1299_REG_CH1SET)); */
   ESP_LOGI(TAG, "MISC1   = 0x%02X", ads1299_read_register(ADS1299_REG_MISC1));  
 }
 
@@ -255,13 +251,9 @@ void ads1299_start(void) {
   ads1299_cmd(ADS1299_CMD_START);
   /* gpio_set_level(ads1299_start_pin, 1); */
   ads1299_cmd(ADS1299_CMD_RDATAC);
-  
-  ads_running = true;
 }
 
 void ads1299_stop(void) {
-  ads_running = false;
-
   ads1299_cmd(ADS1299_CMD_SDATAC);
   /* gpio_set_level(ads1299_start_pin, 0); */
   ads1299_cmd(ADS1299_CMD_STOP);
@@ -291,18 +283,18 @@ void ads1299_read(ads1299_data_t *data) {
   for (uint8_t i = 0; i < 8; i++) {
     uint32_t idx = 3 + (i * 3);
 
-    uint32_t value =
-      ((uint32_t)raw[idx] << 16) |
-      ((uint32_t)raw[idx + 1] << 8)  |
-      ((uint32_t)raw[idx + 2]);
+    int32_t value =
+      ((int32_t)raw[idx] << 16) |
+      ((int32_t)raw[idx + 1] << 8)  |
+      ((int32_t)raw[idx + 2]);
 
-    /* /\* */
-    /*  * Sign extension: */
-    /*  * 24-bit -> 32-bit */
-    /*  *\/ */
-    /* if (value & 0x00800000) { */
-    /*   value |= 0xFF000000; */
-    /* } */
+    /*
+     * Sign extension:
+     * 24-bit -> 32-bit
+     */
+    if (value & 0x00800000) {
+      value |= 0xFF000000;
+    }
 
     data->channel[i] = value;
   }

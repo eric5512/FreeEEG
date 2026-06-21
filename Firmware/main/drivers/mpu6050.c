@@ -14,7 +14,7 @@
 #define TAG "mpu6050"
 
 #define MPU6050_I2C_PORT      I2C_NUM_0
-#define MPU6050_I2C_FREQ_HZ   400000
+#define MPU6050_I2C_FREQ_HZ   50000
 #define MPU6050_ADDR          0x68
 
 #define MPU6050_REG_SMPLRT    0x19
@@ -26,8 +26,6 @@
 #define MPU6050_REG_ACCEL_X_H 0x3B
 #define MPU6050_REG_PWR_MGMT1 0x6B
 #define MPU6050_REG_WHO_AM_I  0x75
-
-static bool mpu_running = false;
 
 static gpio_num_t mpu_int_pin = GPIO_NUM_NC;
 
@@ -114,42 +112,31 @@ void mpu6050_init(uint8_t pin_scl, uint8_t pin_sda, uint8_t pin_int, void (*int_
     if (whoami == 0x68) {
         ESP_LOGI(TAG, "MPU-6050 device found");
     } else {
-        ESP_LOGE(TAG, "MPU-6050 device not found, WHO_AM_I = 0x%02X", whoami);
+      ESP_LOGE(TAG, "MPU-6050 device not found, WHO_AM_I = 0x%02X", whoami);
     }
-
-    mpu_running = false;
 
     ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_PWR_MGMT1, 0x00));
     vTaskDelay(pdMS_TO_TICKS(100));
 
-    ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_SMPLRT, 9));
-    ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_CONFIG, 0x03));
-    ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_GYRO_CFG, 0x00));
-    ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_ACCEL_CFG, 0x00));
+    ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_SMPLRT, 9));        // 100 Hz if DLPF enabled
+    ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_CONFIG, 0x03));     // DLPF enabled
+    ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_GYRO_CFG, 0x00));   // ±250 dps
+    ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_ACCEL_CFG, 0x00));  // ±2g
 
     if (mpu_int_callback != NULL) {
-        gpio_config_t int_conf = {
-            .pin_bit_mask = 1ULL << mpu_int_pin,
-            .mode = GPIO_MODE_INPUT,
-            .pull_up_en = GPIO_PULLUP_DISABLE,
-            .pull_down_en = GPIO_PULLDOWN_DISABLE,
-            .intr_type = GPIO_INTR_POSEDGE,
-        };
+      gpio_config_t int_conf = {
+        .pin_bit_mask = 1ULL << mpu_int_pin,
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_POSEDGE,
+      };
 
-        ESP_ERROR_CHECK(gpio_config(&int_conf));
+      ESP_ERROR_CHECK(gpio_config(&int_conf));
+      ESP_ERROR_CHECK(gpio_isr_handler_add(mpu_int_pin, mpu6050_isr_handler, NULL));
 
-        ESP_ERROR_CHECK(
-            gpio_isr_handler_add(
-                mpu_int_pin,
-                mpu6050_isr_handler,
-                NULL
-            )
-        );
-
-        ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_INT_CFG, 0x10));
-        ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_INT_EN, 0x01));
-    } else {
-        ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_INT_EN, 0x00));
+      ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_INT_CFG, 0x10)); // latched + clear on read
+      ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_INT_EN, 0x01));  // data ready interrupt
     }
 }
 
@@ -162,18 +149,15 @@ void mpu6050_start(void) {
         ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_INT_EN, 0x00));
     }
 
-    mpu_running = true;
 }
 
 void mpu6050_stop(void) {
-    mpu_running = false;
-
     ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_INT_EN, 0x00));
     ESP_ERROR_CHECK(mpu6050_write_reg(MPU6050_REG_PWR_MGMT1, 0x40));
 }
 
-void mpu6050_read_data(mpu_data_t *data) {
-    if (data == NULL || !mpu_running) {
+void mpu6050_read_data(mpu6050_data_t *data) {
+    if (data == NULL) {
         return;
     }
 
@@ -190,11 +174,11 @@ void mpu6050_read_data(mpu_data_t *data) {
         return;
     }
 
-    data->acc.x = (int16_t)((raw[0] << 8) | raw[1]);
-    data->acc.y = (int16_t)((raw[2] << 8) | raw[3]);
-    data->acc.z = (int16_t)((raw[4] << 8) | raw[5]);
+    data->accel.x = (int16_t)((raw[0] << 8) | raw[1]);
+    data->accel.y = (int16_t)((raw[2] << 8) | raw[3]);
+    data->accel.z = (int16_t)((raw[4] << 8) | raw[5]);
 
-    data->gyr.x = (int16_t)((raw[8]  << 8) | raw[9]);
-    data->gyr.y = (int16_t)((raw[10] << 8) | raw[11]);
-    data->gyr.z = (int16_t)((raw[12] << 8) | raw[13]);
+    data->gyro.x = (int16_t)((raw[8]  << 8) | raw[9]);
+    data->gyro.y = (int16_t)((raw[10] << 8) | raw[11]);
+    data->gyro.z = (int16_t)((raw[12] << 8) | raw[13]);
 }

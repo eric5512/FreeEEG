@@ -24,7 +24,7 @@ class FreeEEG:
             "I"      # abs_timestamp
             "B"      # num_elec
             f"{self.__ELEC_BUFF_SIZE}I"
-            f"{self.__ELEC_BUFF_SIZE * 8}I"
+            f"{self.__ELEC_BUFF_SIZE * 8}i"
             "B"      # num_imu
             f"{self.__IMU_BUFF_SIZE}I"
             f"{self.__IMU_BUFF_SIZE * 3}H"
@@ -54,12 +54,22 @@ class FreeEEG:
         imu_data: list[tuple[int, tuple[int,int,int], tuple[int,int,int]]]
         event_data: list[tuple[int, int]]
 
-        def as_csv(self) -> str:
+        CSV_HEADER = "timestamp,e1,e2,e3,e4,e5,e6,e7,e8,ax,ay,az,gx,gy,gz,event\n"
+        
+        def as_csv(self, gain=1) -> str:
             buff = ""
-            # timestamp,e1,e2,e3,e4,e5,e6,e7,e8,ax,ay,az,gx,gy,gz,event
             for et, ed in self.elec_data:
-                buff += f"{self.abs_time+et/1e6}," + ",".join(str(FreeEEG.adc_to_volts(i)) for i in ed) + "\n"
-                
+                buff += f"{self.abs_time+et/1e6}," + \
+                    ",".join(str(FreeEEG.adc_to_volts(i, gain)) for i in ed) + \
+                    "".join("," for i in range(6)) + \
+                    ",\n"
+
+            for it, ida in self.imu_data:
+                ad, gd = ida
+                (ax, ay, az) = ad
+                (gx, gy, gz) = gd
+                buff += f"{self.abs_time+it/1e6}," + "".join("," for i in range(FreeEEG.N_ELECTRODES)) + f"{ax},{ay},{az},{gx},{gy},{gz},\n"
+
             return buff
                 
     def __parse_packet(self, data):
@@ -155,5 +165,5 @@ class FreeEEG:
         self.__udp.sendto("stop".encode(), self.__remote_address)
         self.__udp.close()
 
-    def adc_to_volts(value):
-        return (value if value >= 0x800000 else value - 0xFFFFFF) * FreeEEG.FSR / 0xFFFFFF
+    def adc_to_volts(value, gain):
+        return value * FreeEEG.FSR / (gain*8388607.0)
