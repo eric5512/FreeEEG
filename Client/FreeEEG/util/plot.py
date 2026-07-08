@@ -20,7 +20,7 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--save', action='store_true')
     parser.add_argument('-e', '--elec', type=int, choices=list(range(FreeEEG.N_ELECTRODE)), action='append', required=True)
     parser.add_argument('-i', '--imu', type=str, choices=['a.x', 'a.y', 'a.z', 'g.x', 'g.y', 'g.z'], action='append')
-    parser.add_argument('-g', '--gain', type=int, default=24)
+    parser.add_argument('-g', '--gain', type=int)
     parser.add_argument('--psd', action='store_true')
     parser.add_argument('--fs', type=float, default=250.0)
     parser.add_argument('--notch50', action='store_true')
@@ -183,46 +183,42 @@ if __name__ == '__main__':
     def update(frame):
         global t0, csv
 
-        packet = next(generator)
+        packets = []
+        while (packet := next(generator)) != None:
+            packets.append(packet)
 
-        if packet is None:
+        if len(packets) == 0:
             return tuple(eeg_lines.values()) + tuple(imu_lines.values()) + tuple(psd_lines.values())
 
-        if args.save:
-            csv.write(packet.as_csv(args.gain))
+        for packet in packets:
+            if args.save:
+                csv.write(packet.as_csv(args.gain))
+            for t, data in packet.elec_data:
+                ts = t/1e6+packet.abs_time
+                time_data.append(ts)
 
-        for rel_timestamp, data in packet.elec_data:
-            timestamp = packet.abs_time + rel_timestamp / 1e6
+                for ch in CHANNELS_TO_PLOT:
+                    adc_value = data[ch]
+                    volts = adc_value
+                    if args.gain != None:
+                        volts = FreeEEG.adc_to_volts(adc_value, args.gain)
 
-            if t0 is None:
-                t0 = timestamp
+                    if args.notch50:
+                        volts = apply_notch_50(volts, ch)
 
-            time_s = timestamp - t0
-            time_data.append(time_s)
+                    channel_data[ch].append(volts)
 
-            for ch in CHANNELS_TO_PLOT:
-                adc_value = data[ch]
-                volts = FreeEEG.adc_to_volts(adc_value, args.gain)
+            for t, accel, gyro in imu_data:
+                ts = t/1e6+packet.abs_time
+                imu_time_data.append(ts)
 
-                if args.notch50:
-                    volts = apply_notch_50(volts, ch)
+                for name in IMU_TO_PLOT:
+                    sensor, axis = imu_index[name]
 
-                channel_data[ch].append(volts)
-
-        for timestamp, accel, gyro in packet.imu_data:
-            if t0 is None:
-                continue
-
-            time_s = packet.abs_time + timestamp / 1e6 - t0
-            imu_time_data.append(time_s)
-
-            for name in IMU_TO_PLOT:
-                sensor, axis = imu_index[name]
-
-                if sensor == 'accel':
-                    imu_data[name].append(accel[axis])
-                else:
-                    imu_data[name].append(gyro[axis])
+                    if sensor == 'accel':
+                        imu_data[name].append(accel[axis])
+                    else:
+                        imu_data[name].append(gyro[axis])
 
         for ch in CHANNELS_TO_PLOT:
             eeg_lines[ch].set_data(time_data, channel_data[ch])

@@ -47,7 +47,7 @@ typedef struct {
 typedef struct {
   struct timeval timestamp;
   uint8_t status[3];
-  uint32_t channel[8];
+  int32_t channel[8];
 } ads1299_data_t;
 
 void ads1299_init(uint8_t pin_mosi, uint8_t pin_miso, uint8_t pin_sck, uint8_t pin_cs, uint8_t pin_drdy, uint8_t pin_start, void (*drdy_callback)(void));

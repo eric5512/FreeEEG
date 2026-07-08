@@ -12,6 +12,7 @@
 *-bak
 *-bak*
 *.csv
+*.txt
 *~
 ~*
 _autosave-*
@@ -46,3 +47,6 @@ Firmware/build
 
 # VSCode
 .vscode
+
+# EMACS
+*TAGS

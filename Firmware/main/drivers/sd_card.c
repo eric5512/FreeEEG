@@ -64,3 +64,5 @@ FILE* sdcard_new_file(void) {
 void sdcard_unmount(void) {
   esp_vfs_fat_sdcard_unmount(MOUNT_POINT, card);
 }
+
+

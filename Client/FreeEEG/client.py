@@ -56,13 +56,20 @@ class FreeEEG:
 
         CSV_HEADER = "timestamp,e1,e2,e3,e4,e5,e6,e7,e8,ax,ay,az,gx,gy,gz,event\n"
         
-        def as_csv(self, gain=1) -> str:
+        def as_csv(self, gain=None) -> str:
             buff = ""
-            for et, ed in self.elec_data:
-                buff += f"{self.abs_time+et/1e6}," + \
-                    ",".join(str(FreeEEG.adc_to_volts(i, gain)) for i in ed) + \
-                    "".join("," for i in range(6)) + \
-                    ",\n"
+            if gain == None:
+                for et, ed in self.elec_data:
+                    buff += f"{self.abs_time+et/1e6}," + \
+                        ",".join(str(i) for i in ed) + \
+                        "".join("," for i in range(6)) + \
+                        ",\n"
+            else:
+                for et, ed in self.elec_data:
+                    buff += f"{self.abs_time+et/1e6}," + \
+                        ",".join(str(FreeEEG.adc_to_volts(i, gain)) for i in ed) + \
+                        "".join("," for i in range(6)) + \
+                        ",\n"
 
             for it, ida in self.imu_data:
                 ad, gd = ida

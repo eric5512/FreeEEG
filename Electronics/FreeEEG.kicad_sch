@@ -7681,8 +7681,8 @@
 		(uuid 5e30fee8-4fce-4ff4-887c-e2463aeaeda1)
 	)
 	(rectangle
-		(start 12.7 146.05)
-		(end 80.645 197.485)
+		(start 12.065 146.05)
+		(end 80.645 198.12)
 		(stroke
 			(width 0)
 			(type default)
@@ -7694,7 +7694,7 @@
 	)
 	(rectangle
 		(start 80.645 165.735)
-		(end 177.165 197.485)
+		(end 177.165 198.12)
 		(stroke
 			(width 0)
 			(type default)
@@ -28762,10 +28762,10 @@
 			)
 		)
 		(pin "2"
-			(uuid "58f744df-19ba-48c6-98bb-221a4d699ef1")
+			(uuid "58f744df-19ba-48c6-98bb-221a4d699ef2")
 		)
 		(pin "1"
-			(uuid "3bb5f36d-b304-4456-8c8e-d16d75bb8feb")
+			(uuid "3bb5f36d-b304-4456-8c8e-d16d75bb8fec")
 		)
 		(instances
 			(project "FreeEEG"

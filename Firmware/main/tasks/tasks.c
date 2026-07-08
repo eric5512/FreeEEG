@@ -140,18 +140,80 @@ void tasks_init() {
   buff_imu = xRingbufferCreateNoSplit(sizeof(mpu6050_data_t), 500);
 }
 
+
+static int32_t offset_coeffs[NUM_ELECTRODES] = {0};
+static bool calibration = false;
+
 void task_afe(void *args) {
   afe_task_handle = xTaskGetCurrentTaskHandle();
 
   ads1299_data_t data;
   
   ads1299_init(ADS1299_PIN_MOSI, ADS1299_PIN_MISO, ADS1299_PIN_SCK, ADS1299_PIN_CS, ADS1299_PIN_DRDY, ADS1299_PIN_START, afe_isr);
+
+  //////////////////////CALIBRATION///////////////////////////
+  if (calibration) { 
+    float acc[NUM_ELECTRODES] = {0};
+
+    memset(acc, 0, sizeof(acc));
+  
+    ads1299_config_t cal_config = {
+      .sample_rate = ADS1299_CONFIG_SAMPLERATE_1000SPS,
+      .comm_ref = false
+    };
+
+    for (uint8_t i = 0; i < NUM_ELECTRODES; i++) {
+      cal_config.electrodes[i] = ADS1299_CONFIG_CHANNELMODE_SHORTED;
+      cal_config.gains[i] = ADS1299_CONFIG_CHANNELGAIN_1;
+    }
+
+    ads1299_send_config(&cal_config);
+
+    ESP_LOGI(TAG, "Starting calibration...");
+
+    ads1299_start();
+
+    const uint16_t OFFSET_CAL_LEN = 2000;
+
+    for (uint16_t i = 0; i < OFFSET_CAL_LEN; i++) {
+      ulTaskNotifyTake(pdFALSE, portMAX_DELAY);
+
+      ads1299_read(&data);
+
+      if (strcmp((const char*)data.status, "\xC0\x00\x00") != 0) {
+	i--;
+	continue;
+      }
+    
+      for (uint8_t j = 0; j < NUM_ELECTRODES; j++) {
+	acc[j] += (float) data.channel[j] / OFFSET_CAL_LEN;
+      }
+    }
+
+    ads1299_stop();
+
+    for (uint8_t i = 0; i < NUM_ELECTRODES; i++) {
+      offset_coeffs[i] = (int32_t)(acc[i]);
+    }
+
+    ESP_LOGI(TAG, "Calibration offsets: %" PRId32 ",%" PRId32 ",%" PRId32 ",%" PRId32 ",%" PRId32 ",%" PRId32 ",%" PRId32 ",%" PRId32,
+      offset_coeffs[0], offset_coeffs[1], offset_coeffs[2], offset_coeffs[3], offset_coeffs[4], offset_coeffs[5], offset_coeffs[6], offset_coeffs[7]);
+  }
+  ////////////////////////////////////////////////////////////
+  
   ads1299_send_config(&(config->ads1299_config));
 
   while (1) {
     ulTaskNotifyTake(pdFALSE, portMAX_DELAY);
 
     ads1299_read(&data);
+
+    if (strcmp((const char*)data.status, "\xC0\x00\x00") != 0) continue;
+    
+    for (uint8_t i = 0; i < NUM_ELECTRODES; i++) {
+      data.channel[i] -= offset_coeffs[i];
+    }
+    
     data.timestamp = time_afe;
 
     xRingbufferSend(buff_afe, &data, sizeof(data), 0);
@@ -180,7 +242,19 @@ void task_write(void *args) {
     EventBits_t bits = xEventGroupWaitBits(event_group, EVENT_BIT_OFFLINE_MEAS | EVENT_BIT_ONLINE_MEAS, pdFALSE, pdFALSE, portMAX_DELAY);
     if ((bits & EVENT_BIT_OFFLINE_MEAS) == EVENT_BIT_OFFLINE_MEAS) {
       // TODO: Offline data saving
+
+      size_t size;
+      uint8_t count = 0;
+      mpu6050_data_t *data_imu = NULL;
+      while (count < UDP_IMU_BUFF_SIZE) {
+	data_imu = (mpu6050_data_t *) xRingbufferReceive(buff_imu, &size, 0);
+	if (data_imu == NULL) break;
+        ESP_LOGI(TAG, "X: %d, Y: %d, Z: %d", data_imu->accel.x, data_imu->accel.y, data_imu->accel.z);
+	vRingbufferReturnItem(buff_imu, data_imu);
+	count++;
+      }
       
+      vTaskDelay(pdMS_TO_TICKS(30));      
     } else {
       udp_packet_t packet = {0};
       uint8_t count;
@@ -239,11 +313,11 @@ void task_recv(void *args) {
       ESP_LOGI(TAG, "MSG received from udp: \"%s\"", buff);
       if (strcmp((const char*) buff, "start") == 0) {
 	// Clean all the data buffers
-	vRingbufferReset(buff_afe);	
-	vRingbufferReset(buff_imu);
 	xEventGroupClearBits(event_group, EVENT_BIT_IDLE);
 	xEventGroupSetBits(event_group, EVENT_BIT_ONLINE_MEAS);	
 	wifi_http_stop();
+	vRingbufferReset(buff_imu);
+	vRingbufferReset(buff_afe);	
 	ads1299_start();
       } else if (strcmp((const char*) buff, "stop") == 0) {
 	ads1299_stop();

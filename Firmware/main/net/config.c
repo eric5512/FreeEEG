@@ -16,7 +16,7 @@ void default_config(config_t *conf) {
   conf->ads1299_config.comm_ref = false;
 
   for (uint8_t i = 0; i < NUM_ELECTRODES; i++) {
-    conf->ads1299_config.electrodes[i] = ADS1299_CONFIG_CHANNELMODE_PWRDWN;
+    conf->ads1299_config.electrodes[i] = ADS1299_CONFIG_CHANNELMODE_SHORTED;
     conf->ads1299_config.gains[i] = ADS1299_CONFIG_CHANNELGAIN_1;
   }
 }

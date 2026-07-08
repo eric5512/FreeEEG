@@ -243,7 +243,8 @@ void ads1299_send_config(const ads1299_config_t* conf) {
   ESP_LOGI(TAG, "CONFIG1 = 0x%02X", ads1299_read_register(ADS1299_REG_CONFIG1));
   ESP_LOGI(TAG, "CONFIG2 = 0x%02X", ads1299_read_register(ADS1299_REG_CONFIG2));
   ESP_LOGI(TAG, "CONFIG3 = 0x%02X", ads1299_read_register(ADS1299_REG_CONFIG3));
-  ESP_LOGI(TAG, "MISC1   = 0x%02X", ads1299_read_register(ADS1299_REG_MISC1));  
+  ESP_LOGI(TAG, "MISC1   = 0x%02X", ads1299_read_register(ADS1299_REG_MISC1));
+  ESP_LOGI(TAG, "CH1SET  = 0x%02X", ads1299_read_register(ADS1299_REG_CH1SET));
 }
 
 void ads1299_start(void) {
@@ -284,10 +285,10 @@ void ads1299_read(ads1299_data_t *data) {
     uint32_t idx = 3 + (i * 3);
 
     int32_t value =
-      ((int32_t)raw[idx] << 16) |
-      ((int32_t)raw[idx + 1] << 8)  |
-      ((int32_t)raw[idx + 2]);
-
+      ((uint32_t)raw[idx] << 16) |
+      ((uint32_t)raw[idx + 1] << 8)  |
+      ((uint32_t)raw[idx + 2]);
+   
     /*
      * Sign extension:
      * 24-bit -> 32-bit
