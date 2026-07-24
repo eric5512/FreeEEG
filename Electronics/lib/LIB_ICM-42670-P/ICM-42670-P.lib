@@ -1,0 +1,37 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#SamacSys ECAD Model ICM-42670-P
+#/14609419/1464003/2.50/14/2/Integrated Circuit
+DEF ICM-42670-P IC 0 30 Y Y 1 F N
+F0 "IC" 1650 1700 50 H V L CNN
+F1 "ICM-42670-P" 1650 1600 50 H V L CNN
+F2 "ICM42670P" 1650 1500 50 H I L CNN
+F3 "https://3cfeqx1hf82y3xcoull08ihx-wpengine.netdna-ssl.com/wp-content/uploads/2021/07/DS-000451-ICM-42670-P-v1.0.pdf" 1650 1400 50 H I L CNN
+F4 "IMUs - Inertial Measurement Units Low-Power, Premium Performance 6-Axis MotionTrackingTM IMU with I3C, I2C and SPI interface in 2.5mm x 3mm Package" 1650 1300 50 H I L CNN "Description"
+F5 "" 1650 1200 50 H I L CNN "Height"
+F6 "TDK" 1650 1100 50 H I L CNN "Manufacturer_Name"
+F7 "ICM-42670-P" 1650 1000 50 H I L CNN "Manufacturer_Part_Number"
+F8 "410-ICM-42670-P" 1650 900 50 H I L CNN "Mouser Part Number"
+F9 "https://www.mouser.co.uk/ProductDetail/TDK-InvenSense/ICM-42670-P?qs=iLbezkQI%252BsgK8sMF5V7fQQ%3D%3D" 1650 800 50 H I L CNN "Mouser Price/Stock"
+F10 "ICM-42670-P" 1650 700 50 H I L CNN "Arrow Part Number"
+F11 "https://www.arrow.com/en/products/icm-42670-p/invensense.html?utm_currency=USD&region=nac" 1650 600 50 H I L CNN "Arrow Price/Stock"
+DRAW
+X AP_SDO_/_AP_AD0 1 0 0 200 R 50 50 0 0 P
+X RESV_1 2 0 -100 200 R 50 50 0 0 P
+X RESV_2 3 0 -200 200 R 50 50 0 0 P
+X INT1_/_INT 4 0 -300 200 R 50 50 0 0 P
+X VDDIO 5 800 -1000 200 U 50 50 0 0 P
+X GND 6 900 -1000 200 U 50 50 0 0 P
+X FSYNC 7 1000 -1000 200 U 50 50 0 0 P
+X VDD 8 1800 -300 200 L 50 50 0 0 P
+X INT2 9 1800 -200 200 L 50 50 0 0 P
+X RESV_3 10 1800 -100 200 L 50 50 0 0 P
+X RESV_4 11 1800 0 200 L 50 50 0 0 P
+X AP_CS 12 1000 1700 200 D 50 50 0 0 P
+X AP_SCL_/_AP_SCLK 13 900 1700 200 D 50 50 0 0 P
+X AP_SDA_/_AP_SDIO_/_AP_SDI 14 800 1700 200 D 50 50 0 0 P
+P 5 0 1 6 200 1500 1600 1500 1600 -800 200 -800 200 1500 N
+ENDDRAW
+ENDDEF
+#
+#End Library
