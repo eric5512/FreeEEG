@@ -26,6 +26,7 @@ fp-info-cache
 __pycache__
 \#auto_saved_files#
 
+Electronics/.history
 Firmware/build
 
 # Netlist files (exported from Eeschema)
@@ -50,3 +51,6 @@ Firmware/build
 
 # EMACS
 *TAGS
+
+# NixOS
+*.nix

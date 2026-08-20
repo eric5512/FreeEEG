@@ -208,7 +208,7 @@ if __name__ == '__main__':
 
                     channel_data[ch].append(volts)
 
-            for t, accel, gyro in imu_data:
+            for t, accel, gyro in packet.imu_data:
                 ts = t/1e6+packet.abs_time
                 imu_time_data.append(ts)
 

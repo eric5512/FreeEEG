@@ -9,8 +9,8 @@
 
 #include "ads1299.h"
 #include "wifi_app.h"
-#include "RGB_LED.h"
-#include "mpu6050.h"
+#include "ws2812.h"
+#include "icm42670.h"
 
 #include "driver/gpio.h"
 
@@ -23,13 +23,11 @@
 #define ADS1299_PIN_CS		10
 #define ADS1299_PIN_START	14
 
-#define RGB_PIN_R	17
-#define RGB_PIN_G	21
-#define RGB_PIN_B	18
+#define WS2812_PIN	17
 
-#define MPU6050_PIN_SDA	38
-#define MPU6050_PIN_SCL	39
-#define MPU6050_PIN_INT	40
+#define ICM42670_PIN_SDA	38
+#define ICM42670_PIN_SCL	39
+#define ICM42670_PIN_INT	40
 
 #define SDCARD_PIN_DAT0 2
 #define SDCARD_PIN_DAT1 1
@@ -69,7 +67,6 @@ static void IRAM_ATTR imu_isr(void) {
         portYIELD_FROM_ISR();
     }
 }
-
 
 static TaskHandle_t afe_task_handle = NULL;
 static void IRAM_ATTR afe_isr(void) {
@@ -130,14 +127,14 @@ void tasks_init() {
   wifi_http_start();
   wifi_udp_start();
   
-  RGB_init(RGB_PIN_R, RGB_PIN_G, RGB_PIN_B);
-  /* RGB_set(0,0,1); */
-
+  ws2812_init(WS2812_PIN);
+  ws2812_set(&WS2812_RED);
+  
   config = get_config();
   default_config(config);
   
   buff_afe = xRingbufferCreateNoSplit(sizeof(ads1299_data_t), 500);
-  buff_imu = xRingbufferCreateNoSplit(sizeof(mpu6050_data_t), 500);
+  buff_imu = xRingbufferCreateNoSplit(sizeof(icm42670_data_t), 500);
 }
 
 
@@ -223,15 +220,13 @@ void task_afe(void *args) {
 void task_imu(void *args) {
   imu_task_handle = xTaskGetCurrentTaskHandle();
 
-  mpu6050_data_t data;
-  mpu6050_init(MPU6050_PIN_SCL, MPU6050_PIN_SDA, MPU6050_PIN_INT, imu_isr);
-  mpu6050_start();
+  icm42670_data_t data;
+  icm42670_init(ICM42670_PIN_SCL, ICM42670_PIN_SDA, ICM42670_PIN_INT, imu_isr);
   while(1) {
     ulTaskNotifyTake(pdFALSE, portMAX_DELAY);
 
-    mpu6050_read_data(&data);
+    icm42670_read_data(&data);
     data.timestamp = time_imu;
-    
     xRingbufferSend(buff_imu, &data, sizeof(data), 0);
   }
 }
@@ -245,9 +240,9 @@ void task_write(void *args) {
 
       size_t size;
       uint8_t count = 0;
-      mpu6050_data_t *data_imu = NULL;
+      icm42670_data_t *data_imu = NULL;
       while (count < UDP_IMU_BUFF_SIZE) {
-	data_imu = (mpu6050_data_t *) xRingbufferReceive(buff_imu, &size, 0);
+	data_imu = (icm42670_data_t *) xRingbufferReceive(buff_imu, &size, 0);
 	if (data_imu == NULL) break;
         ESP_LOGI(TAG, "X: %d, Y: %d, Z: %d", data_imu->accel.x, data_imu->accel.y, data_imu->accel.z);
 	vRingbufferReturnItem(buff_imu, data_imu);
@@ -285,10 +280,11 @@ void task_write(void *args) {
 
       // Read IMU data from buffer
       count = 0;
-      mpu6050_data_t *data_imu = NULL;
+      icm42670_data_t *data_imu = NULL;
       while (count < UDP_IMU_BUFF_SIZE) {
-	data_imu = (mpu6050_data_t *) xRingbufferReceive(buff_imu, &size, 0);
+	data_imu = (icm42670_data_t *) xRingbufferReceive(buff_imu, &size, 0);
 	if (data_imu == NULL) break;
+	packet.imu_time[count] = data_imu->timestamp.tv_usec;
 	if (data_imu->timestamp.tv_sec > packet.abs_time)
 	  packet.imu_time[count] += 1000000;
 	packet.accel_data[count][0] = data_imu->accel.x; packet.accel_data[count][1] = data_imu->accel.y; packet.accel_data[count][2] = data_imu->accel.z;
@@ -319,8 +315,10 @@ void task_recv(void *args) {
 	vRingbufferReset(buff_imu);
 	vRingbufferReset(buff_afe);	
 	ads1299_start();
+	icm42670_start();
       } else if (strcmp((const char*) buff, "stop") == 0) {
 	ads1299_stop();
+	icm42670_stop();
 	wifi_http_start();
 	xEventGroupClearBits(event_group, EVENT_BIT_ONLINE_MEAS);
 	xEventGroupSetBits(event_group, EVENT_BIT_IDLE);
