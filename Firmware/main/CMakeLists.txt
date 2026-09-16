@@ -1,12 +1,5 @@
-idf_component_register(SRCS "ESP32.c"
-			    "drivers/ads1299.c"
-			    "drivers/icm42670.c"
-			    "drivers/ics43434.c"
-			    "drivers/sd_card.c"
-			    "drivers/ws2812.c"
-			    "net/wifi_app_ap.c"
-			    "net/wifi_app_config.c"
-			    "net/wifi_app_data.c"
-			    "net/config.c"
-			    "tasks/tasks.c"
-			    INCLUDE_DIRS "include")
+idf_component_register(
+    SRCS "FreeEEG.c"
+    INCLUDE_DIRS "."
+    PRIV_REQUIRES eeg_app
+)

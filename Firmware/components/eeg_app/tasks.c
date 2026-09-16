@@ -13,38 +13,12 @@
 #include "icm42670.h"
 #include "ics43434.h"
 
+#include "config_util.h"
+#include "pin_config.h"
+
 #include "driver/gpio.h"
 
 #define TAG "tasks"
-
-#define ADS1299_PIN_MOSI	11 
-#define ADS1299_PIN_MISO	13
-#define ADS1299_PIN_SCK		12
-#define ADS1299_PIN_DRDY	15
-#define ADS1299_PIN_CS		10
-#define ADS1299_PIN_START	14
-
-#define WS2812_PIN	17
-
-#define ICM42670_PIN_SDA	38
-#define ICM42670_PIN_SCL	39
-#define ICM42670_PIN_INT	40
-
-#define ICS43434_PIN_CLK  41
-#define ICS43434_PIN_WS   18
-#define ICS43434_PIN_DATA 42
-
-#define SDCARD_PIN_DAT0 2
-#define SDCARD_PIN_DAT1 1
-#define SDCARD_PIN_DAT2 3
-#define SDCARD_PIN_DAT3 8
-#define SDCARD_PIN_CMD  7
-#define SDCARD_PIN_CLK  6
-#define SDCARD_PIN_CD   9
-
-#define BATTERY_PIN	4
-
-#define SWITCH_PIN      16
 
 #define EVENT_BIT_OFFLINE_MEAS  (1<<0)
 #define EVENT_BIT_ONLINE_MODE	(1<<1)
@@ -56,8 +30,6 @@ static RingbufHandle_t buff_afe;
 static RingbufHandle_t buff_imu;
 static struct timeval time_afe;
 static struct timeval time_imu;
-
-static config_t *config;
 
 static TaskHandle_t imu_task_handle = NULL;
 static void IRAM_ATTR imu_isr(void) {
@@ -137,8 +109,10 @@ void tasks_init() {
 
   ics43434_init(ICS43434_PIN_WS, ICS43434_PIN_CLK, ICS43434_PIN_DATA);
   
-  config = get_config();
-  default_config(config);
+  // TODO: Try to load previous config, if not stores default values 
+  /* config_t config; */
+  /* default_config(config); */
+  // apply_config(config);
   
   buff_afe = xRingbufferCreateNoSplit(sizeof(ads1299_data_t), 500);
   buff_imu = xRingbufferCreateNoSplit(sizeof(icm42670_data_t), 500);
@@ -167,8 +141,8 @@ void task_afe(void *args) {
     };
 
     for (uint8_t i = 0; i < NUM_ELECTRODES; i++) {
-      cal_config.electrodes[i] = ADS1299_CONFIG_CHANNELMODE_SHORTED;
-      cal_config.gains[i] = ADS1299_CONFIG_CHANNELGAIN_1;
+      cal_config.electrodes[i] = ADS1299_CONFIG_MODE_SHORTED;
+      cal_config.gains[i] = ADS1299_CONFIG_GAIN_1;
     }
 
     ads1299_send_config(&cal_config);
@@ -204,8 +178,9 @@ void task_afe(void *args) {
       offset_coeffs[0], offset_coeffs[1], offset_coeffs[2], offset_coeffs[3], offset_coeffs[4], offset_coeffs[5], offset_coeffs[6], offset_coeffs[7]);
   }
   ////////////////////////////////////////////////////////////
-  
-  ads1299_send_config(&(config->ads1299_config));
+  const config_t *config = get_config();
+  ads1299_config_t ads_config = config_to_ads1299(config);
+  ads1299_send_config(&ads_config);
 
   while (1) {
     ulTaskNotifyTake(pdFALSE, portMAX_DELAY);

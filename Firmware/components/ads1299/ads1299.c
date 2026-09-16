@@ -227,7 +227,7 @@ void ads1299_send_config(const ads1299_config_t* conf) {
   for (int i = 0; i < NUM_ELECTRODES; i++) {
     uint8_t ch_reg = ADS1299_REG_CH1SET + i;
 
-    if (conf->electrodes[i] != ADS1299_CONFIG_CHANNELMODE_PWRDWN) {
+    if (conf->electrodes[i] != ADS1299_CONFIG_MODE_PWRDWN) {
       // Enabled channel:
       uint8_t ch_val = (conf->gains[i] << 4) | conf->electrodes[i];
       ads1299_write_reg(ch_reg, ch_val);

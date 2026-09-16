@@ -1,0 +1,30 @@
+#pragma once
+
+#define ADS1299_PIN_MOSI	11 
+#define ADS1299_PIN_MISO	13
+#define ADS1299_PIN_SCK		12
+#define ADS1299_PIN_DRDY	15
+#define ADS1299_PIN_CS		10
+#define ADS1299_PIN_START	14
+
+#define WS2812_PIN	17
+
+#define ICM42670_PIN_SDA	38
+#define ICM42670_PIN_SCL	39
+#define ICM42670_PIN_INT	40
+
+#define ICS43434_PIN_CLK  41
+#define ICS43434_PIN_WS   18
+#define ICS43434_PIN_DATA 42
+
+#define SDCARD_PIN_DAT0 2
+#define SDCARD_PIN_DAT1 1
+#define SDCARD_PIN_DAT2 3
+#define SDCARD_PIN_DAT3 8
+#define SDCARD_PIN_CMD  7
+#define SDCARD_PIN_CLK  6
+#define SDCARD_PIN_CD   9
+
+#define BATTERY_PIN	4
+
+#define SWITCH_PIN      16

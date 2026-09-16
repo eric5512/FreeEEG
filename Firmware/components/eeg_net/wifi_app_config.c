@@ -19,7 +19,7 @@ static httpd_handle_t http_server = NULL;
 
 static esp_err_t http_root_handler(httpd_req_t *req) {
   httpd_resp_set_type(req, "text/html");
-  return httpd_resp_send(req, (const char *) net_index_html, net_index_html_len);
+  return httpd_resp_send(req, (const char *) webpage_html, webpage_html_len);
 }
 
 /* static esp_err_t http_status_handler(httpd_req_t *req) { */
@@ -27,42 +27,42 @@ static esp_err_t http_root_handler(httpd_req_t *req) {
 /*   return httpd_resp_send(req,  */
 /* } */
 
-ads1299_config_samplerate_t parse_sample_rate(const char *value) {
-    if (strcmp(value, "250") == 0) return ADS1299_CONFIG_SAMPLERATE_250SPS;
-    if (strcmp(value, "500") == 0) return ADS1299_CONFIG_SAMPLERATE_500SPS;
-    if (strcmp(value, "1000") == 0) return ADS1299_CONFIG_SAMPLERATE_1000SPS;
-    if (strcmp(value, "2000") == 0) return ADS1299_CONFIG_SAMPLERATE_2000SPS;
-    if (strcmp(value, "4000") == 0) return ADS1299_CONFIG_SAMPLERATE_4000SPS;
-    if (strcmp(value, "8000") == 0) return ADS1299_CONFIG_SAMPLERATE_8000SPS;
-    if (strcmp(value, "16000") == 0) return ADS1299_CONFIG_SAMPLERATE_16000SPS;
+config_samplerate_t parse_sample_rate(const char *value) {
+    if (strcmp(value, "250") == 0) return CONFIG_SAMPLERATE_250;
+    if (strcmp(value, "500") == 0) return CONFIG_SAMPLERATE_500;
+    if (strcmp(value, "1000") == 0) return CONFIG_SAMPLERATE_1000;
+    if (strcmp(value, "2000") == 0) return CONFIG_SAMPLERATE_2000;
+    if (strcmp(value, "4000") == 0) return CONFIG_SAMPLERATE_4000;
+    if (strcmp(value, "8000") == 0) return CONFIG_SAMPLERATE_8000;
+    if (strcmp(value, "16000") == 0) return CONFIG_SAMPLERATE_16000;
 
-    return ADS1299_CONFIG_SAMPLERATE_250SPS;
+    return CONFIG_SAMPLERATE_250;
 }
 
-ads1299_config_channelgain_t parse_channel_gain(const char *value) {
-    if (strcmp(value, "1") == 0) return ADS1299_CONFIG_CHANNELGAIN_1;
-    if (strcmp(value, "2") == 0) return ADS1299_CONFIG_CHANNELGAIN_2;
-    if (strcmp(value, "4") == 0) return ADS1299_CONFIG_CHANNELGAIN_4;
-    if (strcmp(value, "6") == 0) return ADS1299_CONFIG_CHANNELGAIN_6;
-    if (strcmp(value, "8") == 0) return ADS1299_CONFIG_CHANNELGAIN_8;
-    if (strcmp(value, "12") == 0) return ADS1299_CONFIG_CHANNELGAIN_12;
-    if (strcmp(value, "24") == 0) return ADS1299_CONFIG_CHANNELGAIN_24;
+config_gain_t parse_channel_gain(const char *value) {
+    if (strcmp(value, "1") == 0) return CONFIG_GAIN_1;
+    if (strcmp(value, "2") == 0) return CONFIG_GAIN_2;
+    if (strcmp(value, "4") == 0) return CONFIG_GAIN_4;
+    if (strcmp(value, "6") == 0) return CONFIG_GAIN_6;
+    if (strcmp(value, "8") == 0) return CONFIG_GAIN_8;
+    if (strcmp(value, "12") == 0) return CONFIG_GAIN_12;
+    if (strcmp(value, "24") == 0) return CONFIG_GAIN_24;
 
-    return ADS1299_CONFIG_CHANNELGAIN_24;
+    return CONFIG_GAIN_24;
 }
 
-ads1299_config_channelmode_t parse_channel_mode(const char *value) {
-    if (strcmp(value, "-1") == 0) return ADS1299_CONFIG_CHANNELMODE_PWRDWN;
-    if (strcmp(value, "0") == 0) return ADS1299_CONFIG_CHANNELMODE_NORMAL;
-    if (strcmp(value, "1") == 0) return ADS1299_CONFIG_CHANNELMODE_SHORTED;
-    if (strcmp(value, "2") == 0) return ADS1299_CONFIG_CHANNELMODE_BIASMEAS;
-    if (strcmp(value, "3") == 0) return ADS1299_CONFIG_CHANNELMODE_MVDD;
-    if (strcmp(value, "4") == 0) return ADS1299_CONFIG_CHANNELMODE_TEMP;
-    if (strcmp(value, "5") == 0) return ADS1299_CONFIG_CHANNELMODE_TEST;
-    if (strcmp(value, "6") == 0) return ADS1299_CONFIG_CHANNELMODE_BIASDRP;
-    if (strcmp(value, "7") == 0) return ADS1299_CONFIG_CHANNELMODE_BIASDRN;
+config_channel_mode_t parse_channel_mode(const char *value) {
+    if (strcmp(value, "-1") == 0) return CONFIG_CHANNEL_PWRDWN;
+    if (strcmp(value, "0") == 0) return CONFIG_CHANNEL_NORMAL;
+    if (strcmp(value, "1") == 0) return CONFIG_CHANNEL_SHORTED;
+    if (strcmp(value, "2") == 0) return CONFIG_CHANNEL_BIASMEAS;
+    if (strcmp(value, "3") == 0) return CONFIG_CHANNEL_MVDD;
+    if (strcmp(value, "4") == 0) return CONFIG_CHANNEL_TEMP;
+    if (strcmp(value, "5") == 0) return CONFIG_CHANNEL_TEST;
+    if (strcmp(value, "6") == 0) return CONFIG_CHANNEL_BIASDRP;
+    if (strcmp(value, "7") == 0) return CONFIG_CHANNEL_BIASDRN;
 
-    return ADS1299_CONFIG_CHANNELMODE_PWRDWN;
+    return CONFIG_CHANNEL_PWRDWN;
 }
 
 config_filtfreq_t parse_filter_freq(const char *value) {
@@ -92,7 +92,7 @@ static esp_err_t http_update_handler(httpd_req_t *req) {
     const uint8_t BUFF_LEN = 16;
     char buff[BUFF_LEN];
 
-    config_t *config = get_config();
+    config_t config;
     
     for (uint8_t i = 0; i < 8; ++i) {
       char mode[10];
@@ -100,32 +100,32 @@ static esp_err_t http_update_handler(httpd_req_t *req) {
 
       sprintf(mode, "ch%d_mode", i+1);
       if (httpd_query_key_value(content, mode, buff, BUFF_LEN) == ESP_OK) {
-        config->ads1299_config.electrodes[i] = parse_channel_mode(buff);
+        config.channel_mode[i] = parse_channel_mode(buff);
       } else goto fail;
       
       sprintf(gain, "ch%d_gain", i+1);
       if (httpd_query_key_value(content, gain, buff, BUFF_LEN) == ESP_OK) {
-        config->ads1299_config.gains[i] = parse_channel_gain(buff);
+        config.gain[i] = parse_channel_gain(buff);
       } else goto fail;
     }
 
     if (httpd_query_key_value(content, "filt_freq", buff, BUFF_LEN) == ESP_OK) {
-      config->filt_freq = parse_filter_freq(buff);
+      config.filt_freq = parse_filter_freq(buff);
     } else goto fail;
 
     if (httpd_query_key_value(content, "sample_rate", buff, BUFF_LEN) == ESP_OK) {
-      config->ads1299_config.sample_rate = parse_sample_rate(buff);
+      config.sample_rate = parse_sample_rate(buff);
     } else goto fail;
 
     
     if (httpd_query_key_value(content, "comm_ref", buff, BUFF_LEN) == ESP_OK)
-      config->ads1299_config.comm_ref = true;
+      config.common_reference = true;
     else
-      config->ads1299_config.comm_ref = false;
+      config.common_reference = false;
     
     httpd_resp_sendstr(req, "Configuration updated");
 
-    send_config(config);
+    set_config(&config);
     
     return ESP_OK;
 
