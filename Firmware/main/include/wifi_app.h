@@ -37,6 +37,6 @@ typedef struct  __attribute__((packed)) {
 
 void wifi_udp_start(void);
 void wifi_udp_stop(void);
-void wifi_udp_send_data(const uint32_t* data);
 void wifi_udp_send_packet(const udp_packet_t* data);
 bool wifi_udp_recv_packet(uint8_t *buffer);
+void wifi_udp_send(const uint8_t*, size_t);

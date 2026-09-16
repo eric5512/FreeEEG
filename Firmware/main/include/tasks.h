@@ -11,3 +11,4 @@ void task_imu(void *args);
 void task_write(void *args);
 void task_config(void *args);
 void task_recv(void *args);
+void task_sound(void *args);

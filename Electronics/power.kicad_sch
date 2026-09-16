@@ -2344,12 +2344,6 @@
 		(uuid "e1a0b017-bb70-4db0-8f1d-3afb5460d2cd")
 	)
 	(junction
-		(at 180.34 25.4)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "ebf3b59b-7218-479e-8d78-ec7a496527c0")
-	)
-	(junction
 		(at 36.83 43.18)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3568,84 +3562,6 @@
 		)
 	)
 	(symbol
-		(lib_id "power:+5V")
-		(at 180.34 25.4 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "25bafa4a-d569-4e86-bdf9-d013108e53f5")
-		(property "Reference" "#PWR030"
-			(at 180.34 29.21 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "+5V"
-			(at 180.34 20.32 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 180.34 25.4 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 180.34 25.4 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 180.34 25.4 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "83945482-58ba-41af-b9f1-c123c84eb17d")
-		)
-		(instances
-			(project "FreeEEG"
-				(path "/73506cdd-3e07-4c88-b55a-751752d7b384/0c6a6879-c8e8-4b00-ad87-f977b7cde90c"
-					(reference "#PWR030")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "TPS610997YFFR:TPS610997YFFR")
 		(at 52.07 30.48 0)
 		(unit 1)
@@ -4130,7 +4046,7 @@
 				(justify right)
 			)
 		)
-		(property "Value" "5V_TEST"
+		(property "Value" "3V3_TEST"
 			(at 193.802 24.638 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4181,84 +4097,6 @@
 			(project "FreeEEG"
 				(path "/73506cdd-3e07-4c88-b55a-751752d7b384/0c6a6879-c8e8-4b00-ad87-f977b7cde90c"
 					(reference "TP4")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:+3.3V")
-		(at 87.63 25.4 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "49534588-61f6-4bb7-bb94-9b33cf6ee0d6")
-		(property "Reference" "#PWR035"
-			(at 87.63 29.21 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "+3.3V"
-			(at 87.63 20.32 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 87.63 25.4 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 87.63 25.4 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
-			(at 87.63 25.4 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "b3dfacff-dbe0-4706-8825-2f24d1e03b00")
-		)
-		(instances
-			(project "FreeEEG"
-				(path "/73506cdd-3e07-4c88-b55a-751752d7b384/0c6a6879-c8e8-4b00-ad87-f977b7cde90c"
-					(reference "#PWR035")
 					(unit 1)
 				)
 			)
@@ -4611,7 +4449,7 @@
 				(justify right)
 			)
 		)
-		(property "Value" "3V3_TEST"
+		(property "Value" "5V_TEST"
 			(at 101.092 24.638 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5321,6 +5159,84 @@
 		)
 	)
 	(symbol
+		(lib_id "power:+5V")
+		(at 87.63 25.4 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d5f7259e-cfe8-4ddb-90b2-97a5387dae62")
+		(property "Reference" "#PWR030"
+			(at 87.63 29.21 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+5V"
+			(at 87.63 20.32 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 87.63 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 87.63 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+5V\""
+			(at 87.63 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "a6cb2c57-c4ed-4aa3-9fd0-1c8b2f95304d")
+		)
+		(instances
+			(project "FreeEEG"
+				(path "/73506cdd-3e07-4c88-b55a-751752d7b384/0c6a6879-c8e8-4b00-ad87-f977b7cde90c"
+					(reference "#PWR030")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:R")
 		(at 63.5 85.09 0)
 		(unit 1)
@@ -5396,6 +5312,84 @@
 			(project "FreeEEG"
 				(path "/73506cdd-3e07-4c88-b55a-751752d7b384/0c6a6879-c8e8-4b00-ad87-f977b7cde90c"
 					(reference "R15")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3.3V")
+		(at 177.8 25.4 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f5376f24-e767-42a7-9595-cf2e77ae318e")
+		(property "Reference" "#PWR035"
+			(at 177.8 29.21 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3.3V"
+			(at 177.8 20.32 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 177.8 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 177.8 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
+			(at 177.8 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "ccdab5b5-16ab-4622-aa50-6885d31fb300")
+		)
+		(instances
+			(project "FreeEEG"
+				(path "/73506cdd-3e07-4c88-b55a-751752d7b384/0c6a6879-c8e8-4b00-ad87-f977b7cde90c"
+					(reference "#PWR035")
 					(unit 1)
 				)
 			)

@@ -11,6 +11,7 @@
 #include "wifi_app.h"
 #include "ws2812.h"
 #include "icm42670.h"
+#include "ics43434.h"
 
 #include "driver/gpio.h"
 
@@ -28,6 +29,10 @@
 #define ICM42670_PIN_SDA	38
 #define ICM42670_PIN_SCL	39
 #define ICM42670_PIN_INT	40
+
+#define ICS43434_PIN_CLK  41
+#define ICS43434_PIN_WS   18
+#define ICS43434_PIN_DATA 42
 
 #define SDCARD_PIN_DAT0 2
 #define SDCARD_PIN_DAT1 1
@@ -129,6 +134,8 @@ void tasks_init() {
   
   ws2812_init(WS2812_PIN);
   ws2812_set(&WS2812_RED);
+
+  ics43434_init(ICS43434_PIN_WS, ICS43434_PIN_CLK, ICS43434_PIN_DATA);
   
   config = get_config();
   default_config(config);
@@ -229,6 +236,26 @@ void task_imu(void *args) {
     data.timestamp = time_imu;
     xRingbufferSend(buff_imu, &data, sizeof(data), 0);
   }
+}
+
+void task_sound(void *args) {
+  uint32_t buff[1024];
+  uint8_t msg_buff[100];
+  
+  while (1) {
+    if (wifi_udp_recv_packet(msg_buff)) {
+      ESP_LOGI(TAG, "Message received: %s", msg_buff);
+      if (strcmp((const char*)msg_buff, "start") == 0) {
+	ESP_LOGI(TAG, "Starting recording");
+	while (1) {
+	  size_t len = ics43434_read(buff, sizeof buff);
+	  wifi_udp_send((const uint8_t*)buff, len);
+	} 
+	vTaskDelay(pdMS_TO_TICKS(1));
+      }
+    }
+  }
+  ics43434_stop();
 }
 
 void task_write(void *args) {

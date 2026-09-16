@@ -3845,10 +3845,6 @@
 		(uuid "49723283-c07d-4439-9f9c-8fae1e672ba7")
 	)
 	(no_connect
-		(at 25.4 52.07)
-		(uuid "613f2ed2-4969-4d0a-843e-087d9ee0dcb3")
-	)
-	(no_connect
 		(at 199.39 27.94)
 		(uuid "61f410d4-3208-4056-948b-4b837e51bb8a")
 	)
@@ -3919,10 +3915,6 @@
 	(no_connect
 		(at 55.88 54.61)
 		(uuid "d76cbd90-e5f6-4b74-afbe-98640ca0bd33")
-	)
-	(no_connect
-		(at 55.88 49.53)
-		(uuid "dd152a39-ed66-428e-988b-8ca765fe40d7")
 	)
 	(no_connect
 		(at 93.98 132.08)
@@ -5332,6 +5324,30 @@
 			)
 		)
 	)
+	(global_label "I2C_SCL"
+		(shape input)
+		(at 25.4 52.07 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "bc7b1674-6a05-4663-897d-295ca786baef")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 14.8553 52.07 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
 	(global_label "IMU_INT"
 		(shape output)
 		(at 92.71 134.62 180)
@@ -5689,6 +5705,30 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
+			)
+		)
+	)
+	(global_label "I2C_SDA"
+		(shape bidirectional)
+		(at 55.88 49.53 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "fddd93a7-5ae6-44c0-ad02-1b8f817947bc")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 67.5965 49.53 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 			)
 		)
 	)

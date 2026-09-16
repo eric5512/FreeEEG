@@ -1,6 +1,7 @@
 idf_component_register(SRCS "ESP32.c"
 			    "drivers/ads1299.c"
 			    "drivers/icm42670.c"
+			    "drivers/ics43434.c"
 			    "drivers/sd_card.c"
 			    "drivers/ws2812.c"
 			    "net/wifi_app_ap.c"
