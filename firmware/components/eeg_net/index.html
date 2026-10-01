@@ -1,0 +1,159 @@
+<title>Configuration</title>
+<h1>Configuration page</h1>
+
+<form action="/update_config" method="post">
+  <h2>General configuration</h2>
+
+  <p>Notch filter frequency:</p>
+  <input type="radio" id="filt_50" name="filt_freq" value="50" checked>
+  <label for="filt_50">50 Hz</label><br>
+
+  <input type="radio" id="filt_60" name="filt_freq" value="60">
+  <label for="filt_60">60 Hz</label><br>
+
+  <br>
+
+  <label for="sample_rate">Sampling rate:</label>
+  <select name="sample_rate" id="sample_rate">
+    <option value="250" selected>250 SPS</option>
+    <option value="500">500 SPS</option>
+    <option value="1000">1000 SPS</option>
+    <option value="2000">2000 SPS</option>
+    <option value="4000">4000 SPS</option>
+    <option value="8000">8000 SPS</option>
+    <option value="16000">16000 SPS</option>
+  </select>
+
+  <br><br>
+
+  <input type="checkbox" id="comm_ref" name="comm_ref" value="1">
+  <label for="comm_ref">Use common reference for all electrodes</label>
+
+  <br><br>
+
+  <h2>Channel configuration</h2>
+
+  <h2>Apply to all channels</h2>
+
+  <label for="all_mode">Mode:</label>
+  <select id="all_mode">
+    <option value="-1">Powered down</option>
+    <option value="0" selected>Normal electrode</option>
+    <option value="1">Shorted</option>
+    <option value="2">Bias measurement</option>
+    <option value="3">MVDD</option>
+    <option value="4">Temperature</option>
+    <option value="5">Test signal</option>
+    <option value="6">Bias DRP</option>
+    <option value="7">Bias DRN</option>
+  </select>
+
+  <label for="all_gain">Gain:</label>
+  <select id="all_gain">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="4">4</option>
+    <option value="6">6</option>
+    <option value="8">8</option>
+    <option value="12">12</option>
+    <option value="24" selected>24</option>
+  </select>
+
+  <button type="button" onclick="applyToAllChannels()">Apply to all channels</button>
+
+  <br><br>
+
+  <script>
+    function applyToAllChannels() {
+	const mode = document.getElementById("all_mode").value;
+	const gain = document.getElementById("all_gain").value;
+
+	for (let i = 1; i <= 8; i++) {
+            document.querySelector(`select[name="ch${i}_mode"]`).value = mode;
+            document.querySelector(`select[name="ch${i}_gain"]`).value = gain;
+	}
+    }
+  </script>
+  
+  <table border="1" cellpadding="6">
+    <tr>
+      <th>Channel</th>
+      <th>Mode</th>
+      <th>Gain</th>
+    </tr>
+
+    <tr>
+      <td>Electrode 1</td>
+      <td>
+        <select name="ch1_mode">
+          <option value="-1">Powered down</option>
+          <option value="0" selected>Normal electrode</option>
+          <option value="1">Shorted</option>
+          <option value="2">Bias measurement</option>
+          <option value="3">MVDD</option>
+          <option value="4">Temperature</option>
+          <option value="5">Test signal</option>
+          <option value="6">Bias DRP</option>
+          <option value="7">Bias DRN</option>
+        </select>
+      </td>
+      <td>
+        <select name="ch1_gain">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="4">4</option>
+          <option value="6">6</option>
+          <option value="8">8</option>
+          <option value="12">12</option>
+          <option value="24" selected>24</option>
+        </select>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Electrode 2</td>
+      <td><select name="ch2_mode"><option value="-1">Powered down</option><option value="0" selected>Normal electrode</option><option value="1">Shorted</option><option value="2">Bias measurement</option><option value="3">MVDD</option><option value="4">Temperature</option><option value="5">Test signal</option><option value="6">Bias DRP</option><option value="7">Bias DRN</option></select></td>
+      <td><select name="ch2_gain"><option value="1">1</option><option value="2">2</option><option value="4">4</option><option value="6">6</option><option value="8">8</option><option value="12">12</option><option value="24" selected>24</option></select></td>
+    </tr>
+
+    <tr>
+      <td>Electrode 3</td>
+      <td><select name="ch3_mode"><option value="-1">Powered down</option><option value="0" selected>Normal electrode</option><option value="1">Shorted</option><option value="2">Bias measurement</option><option value="3">MVDD</option><option value="4">Temperature</option><option value="5">Test signal</option><option value="6">Bias DRP</option><option value="7">Bias DRN</option></select></td>
+      <td><select name="ch3_gain"><option value="1">1</option><option value="2">2</option><option value="4">4</option><option value="6">6</option><option value="8">8</option><option value="12">12</option><option value="24" selected>24</option></select></td>
+    </tr>
+
+    <tr>
+      <td>Electrode 4</td>
+      <td><select name="ch4_mode"><option value="-1">Powered down</option><option value="0" selected>Normal electrode</option><option value="1">Shorted</option><option value="2">Bias measurement</option><option value="3">MVDD</option><option value="4">Temperature</option><option value="5">Test signal</option><option value="6">Bias DRP</option><option value="7">Bias DRN</option></select></td>
+      <td><select name="ch4_gain"><option value="1">1</option><option value="2">2</option><option value="4">4</option><option value="6">6</option><option value="8">8</option><option value="12">12</option><option value="24" selected>24</option></select></td>
+    </tr>
+
+    <tr>
+      <td>Electrode 5</td>
+      <td><select name="ch5_mode"><option value="-1">Powered down</option><option value="0" selected>Normal electrode</option><option value="1">Shorted</option><option value="2">Bias measurement</option><option value="3">MVDD</option><option value="4">Temperature</option><option value="5">Test signal</option><option value="6">Bias DRP</option><option value="7">Bias DRN</option></select></td>
+      <td><select name="ch5_gain"><option value="1">1</option><option value="2">2</option><option value="4">4</option><option value="6">6</option><option value="8">8</option><option value="12">12</option><option value="24" selected>24</option></select></td>
+    </tr>
+
+    <tr>
+      <td>Electrode 6</td>
+      <td><select name="ch6_mode"><option value="-1">Powered down</option><option value="0" selected>Normal electrode</option><option value="1">Shorted</option><option value="2">Bias measurement</option><option value="3">MVDD</option><option value="4">Temperature</option><option value="5">Test signal</option><option value="6">Bias DRP</option><option value="7">Bias DRN</option></select></td>
+      <td><select name="ch6_gain"><option value="1">1</option><option value="2">2</option><option value="4">4</option><option value="6">6</option><option value="8">8</option><option value="12">12</option><option value="24" selected>24</option></select></td>
+    </tr>
+
+    <tr>
+      <td>Electrode 7</td>
+      <td><select name="ch7_mode"><option value="-1">Powered down</option><option value="0" selected>Normal electrode</option><option value="1">Shorted</option><option value="2">Bias measurement</option><option value="3">MVDD</option><option value="4">Temperature</option><option value="5">Test signal</option><option value="6">Bias DRP</option><option value="7">Bias DRN</option></select></td>
+      <td><select name="ch7_gain"><option value="1">1</option><option value="2">2</option><option value="4">4</option><option value="6">6</option><option value="8">8</option><option value="12">12</option><option value="24" selected>24</option></select></td>
+    </tr>
+
+    <tr>
+      <td>Electrode 8</td>
+      <td><select name="ch8_mode"><option value="-1">Powered down</option><option value="0" selected>Normal electrode</option><option value="1">Shorted</option><option value="2">Bias measurement</option><option value="3">MVDD</option><option value="4">Temperature</option><option value="5">Test signal</option><option value="6">Bias DRP</option><option value="7">Bias DRN</option></select></td>
+      <td><select name="ch8_gain"><option value="1">1</option><option value="2">2</option><option value="4">4</option><option value="6">6</option><option value="8">8</option><option value="12">12</option><option value="24" selected>24</option></select></td>
+    </tr>
+  </table>
+
+  <br>
+
+  <input type="submit" value="Send configuration">
+</form>

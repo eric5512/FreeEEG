@@ -19,7 +19,9 @@ The current prototype integrates:
 - UDP real-time data streaming
 - HTTP-based configuration interface
 - SD card storage through SDIO
-- MPU6050 accelerometer and gyroscope
+- ICM42670 accelerometer and gyroscope
+- ICS43434 microphone
+- QWIIC connector for I2C external peripherals
 - Battery-powered operation
 - Python client library for receiving and decoding data
 
@@ -49,14 +51,13 @@ Main hardware components:
 |---|---|
 | Analog front-end | ADS1299 |
 | Microcontroller | ESP32-S3 |
-| IMU | MPU6050 |
+| IMU | ICM42670 |
+| Microphone | ICS43434 |
 | Storage | microSD card |
 | Wireless communication | ESP32-S3 WiFi |
 | Configuration interface | HTTP server |
 | Real-time streaming | UDP |
 | PCB design tool | KiCad |
-
-The PCB prototype is a two-layer board of approximately 55 mm × 90 mm. The design separates sensitive analog circuitry from noisy digital and switching sections, places the ADS1299 close to the electrode connector, and includes RC low-pass input filtering for each EEG channel.
 
 > **Warning:** The PCB still presents some issues in its current form. More modifications need to be introduced to release the first fully functional version
 
@@ -161,10 +162,8 @@ The current prototype has several limitations:
 - Not medically certified
 - Not intended for clinical or diagnostic use
 - Firmware validation still ongoing
-- First PCB revision required manual correction of reset/boot button circuitry
 - No integrated electrode impedance measurement
 - No dedicated external synchronization connector in the current revision
-- Dry electrodes are more sensitive to motion artifacts
 - Long-duration validation is still required
 
 ## Planned Improvements
@@ -173,12 +172,6 @@ Future development may include:
 
 - Complete firmware validation
 - Full integration testing
-- Improved PCB revision
-- Corrected reset and boot circuitry
-- I2C pull-up resistors for the IMU
-- External synchronization connector
-- Rechargeable battery management
-- Enclosure design
 - Electrode impedance measurement
 - Improved analog filtering
 - Bluetooth or mobile interface support
@@ -236,9 +229,5 @@ This project is provided for educational, research, and experimental use only. I
 The authors and contributors are not responsible for misuse of the hardware, firmware, or software.
 
 ## TODO list:
-- [ ] Solve the PCB issues.
-- [ ] Implement SD card drivers.
-- [ ] Implement offline acquisition mode.
-- [ ] Add more functionality to the client, like ".as_csv()" method to save data.
 - [ ] Add biofeedback example scripts.
-- [ ] Clean repo.
+- [ ] Add bluetooth mode along with Android app.

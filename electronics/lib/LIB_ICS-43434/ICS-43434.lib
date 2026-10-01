@@ -1,0 +1,29 @@
+EESchema-LIBRARY Version 2.3
+#encoding utf-8
+#SamacSys ECAD Model ICS-43434
+#/13690436/1464003/2.50/6/2/Integrated Circuit
+DEF ICS-43434 IC 0 30 Y Y 1 F N
+F0 "IC" 850 300 50 H V L CNN
+F1 "ICS-43434" 850 200 50 H V L CNN
+F2 "ICS43434" 850 100 50 H I L CNN
+F3 "https://www.digikey.in/en/products/detail/tdk-invensense/ICS-43434/6140298?s=N4IgjCBcoCwdIDGUBmBDANgZwKYBoQB7KAbRAGZyAOKgdgCYQBdAgBwBcoQBldgJwCWAOwDmIAL4EYANiihkkdNnxFS4MDHoBOZm06Qe-YWMngtVHQgVLcBYpDIAGXSA5deg0RIIBaRlah%2BAFcVezIAVmZTH3h5VExbVQdwTSoo01kEA" 850 0 50 H I L CNN
+F4 "MEMS Microphones (Microphone), SNR(Nom)=65dBA, LxWxT (mm)=3.5x2.65x0.98" 850 -100 50 H I L CNN "Description"
+F5 "0.98" 850 -200 50 H I L CNN "Height"
+F6 "TDK" 850 -300 50 H I L CNN "Manufacturer_Name"
+F7 "ICS-43434" 850 -400 50 H I L CNN "Manufacturer_Part_Number"
+F8 "410-ICS-43434" 850 -500 50 H I L CNN "Mouser Part Number"
+F9 "https://www.mouser.co.uk/ProductDetail/TDK-InvenSense/ICS-43434?qs=u4fy%2FsgLU9PAgmWRI7%252BqXA%3D%3D" 850 -600 50 H I L CNN "Mouser Price/Stock"
+F10 "ICS-43434" 850 -700 50 H I L CNN "Arrow Part Number"
+F11 "https://www.arrow.com/en/products/ics-43434/invensense?utm_currency=USD&region=nac" 850 -800 50 H I L CNN "Arrow Price/Stock"
+DRAW
+X WS 1 0 0 200 R 50 50 0 0 P
+X LR 2 0 -100 200 R 50 50 0 0 P
+X GND 3 0 -200 200 R 50 50 0 0 P
+X SCK 4 1000 0 200 L 50 50 0 0 P
+X VDD 5 1000 -100 200 L 50 50 0 0 P
+X SD 6 1000 -200 200 L 50 50 0 0 P
+P 5 0 1 6 200 100 800 100 800 -300 200 -300 200 100 N
+ENDDRAW
+ENDDEF
+#
+#End Library

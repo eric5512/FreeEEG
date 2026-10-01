@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP TC5050RGBF08-3CJH-AF53A
+D 40~+85 RGB 200mW SMD5050  Light Emitting Diodes (LED) ROHS
+K
+F https://datasheet.lcsc.com/lcsc/2307310952_TCWIN-TC5050RGBF08-3CJH-AF53A_C784540.pdf
+$ENDCMP
+#
+#End Doc Library

@@ -1,0 +1,11 @@
+(sym_lib_table
+	(version 7)
+	(lib (name "TC5050RGBF08-3CJH-AF53A/TC5050RGBF08-3CJH-AF53A") (type "KiCad") (uri "${KIPRJMOD}/lib/LIB_TC5050RGBF08-3CJH-AF53A/TC5050RGBF08-3CJH-AF53A.kicad_sym") (options "") (descr ""))
+	(lib (name "TF-01A") (type "KiCad") (uri "${KIPRJMOD}/lib/LIB_TF-01A/TF-01A.kicad_sym") (options "") (descr ""))
+	(lib (name "10137065-00021LF") (type "KiCad") (uri "${KIPRJMOD}/lib/LIB_10137065-00021LF/10137065-00021LF.kicad_sym") (options "") (descr ""))
+	(lib (name "ICM-42670-P") (type "KiCad") (uri "${KIPRJMOD}/lib/LIB_ICM-42670-P/ICM-42670-P.kicad_sym") (options "") (descr ""))
+	(lib (name "ICS-43434") (type "KiCad") (uri "${KIPRJMOD}/lib/LIB_ICS-43434/ICS-43434.kicad_sym") (options "") (descr ""))
+	(lib (name "BQ25185DLHR") (type "KiCad") (uri "${KIPRJMOD}/lib/LIB_BQ25185DLHR/BQ25185DLHR.kicad_sym") (options "") (descr ""))
+	(lib (name "B2B-PH-SM4-TBT_LF__SN_") (type "KiCad") (uri "${KIPRJMOD}/lib/LIB_B2B-PH-SM4-TBT_LF__SN_/B2B-PH-SM4-TBT_LF__SN_.kicad_sym") (options "") (descr ""))
+	(lib (name "TPS610997YFFR") (type "KiCad") (uri "${KIPRJMOD}/lib/LIB_TPS610997YFFR/TPS610997YFFR.kicad_sym") (options "") (descr ""))
+)
